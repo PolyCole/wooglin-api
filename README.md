@@ -1,2 +1,4 @@
 # wooglin-api
-The API Powering Wooglin -- Placeholder Repo.
+The API Powering Wooglin.
+
+Built using DjangoRestFramework.
