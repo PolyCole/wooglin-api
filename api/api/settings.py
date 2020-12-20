@@ -62,7 +62,6 @@ INSTALLED_APPS = [
     'restapi',
     'rest_framework',
     'drf_yasg',
-
 ]
 
 MIDDLEWARE = [
@@ -142,6 +141,13 @@ AUTH_PASSWORD_VALIDATORS = [
         'NAME': 'django.contrib.auth.password_validation.NumericPasswordValidator',
     },
 ]
+
+# Uncomment to DISABLE browsable API (in production)
+REST_FRAMEWORK = {
+    # 'DEFAULT_RENDERER_CLASSES': (
+    #     'rest_framework.renderers.JSONRenderer',
+    # )
+}
 
 
 # Internationalization
