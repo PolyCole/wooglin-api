@@ -3,7 +3,8 @@ from django.db import models
 
 
 class Member(models.Model):
-    user = models.ForeignKey(User, on_delete=models.CASCADE)
+    # user = models.ForeignKey(User, on_delete=models.CASCADE)
+    user = models.OneToOneField(User, on_delete=models.CASCADE)
 
     name = models.CharField(max_length=127, db_index=True)
     first_name = models.CharField(max_length=127)
