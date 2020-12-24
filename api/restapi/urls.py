@@ -6,7 +6,7 @@ from rest_framework import routers, permissions
 from restapi import views
 
 router = routers.DefaultRouter()
-router.register(r'member', views.MemberViewSet)
+router.register(r'member', views.MemberViewSet, basename='member')
 
 schema_view = get_schema_view(
     openapi.Info(
