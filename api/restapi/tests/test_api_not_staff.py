@@ -2,6 +2,7 @@ from django.contrib.auth.models import User
 from rest_framework import status
 from rest_framework.test import APITestCase, APIClient
 import json
+from .utilities import get_tokens
 
 from restapi.models.members import Member
 
@@ -38,7 +39,7 @@ class ApiTests(APITestCase):
         """
         Testing if we can access a record with a valid token.
         """
-        token = self.get_tokens("pparker", "totallyNotSpiderman")['access']
+        token = get_tokens("pparker", "totallyNotSpiderman")['access']
         url = '/api/v1/member/1/'
 
         client = APIClient()
@@ -56,7 +57,10 @@ class ApiTests(APITestCase):
         response.render()
         content = json.loads(response.content)
 
+        # Checking content
         self.assertTrue('name' in content)
+        self.assertTrue('address' not in content)
+        self.assertTrue('member_score' not in content)
         self.assertEqual(content['name'], "Pete Parker")
 
     def test_token_get(self):
@@ -80,7 +84,7 @@ class ApiTests(APITestCase):
         Ensuring we're able to refresh our current token.
         """
 
-        token = self.get_tokens("pparker", "totallyNotSpiderman")
+        token = get_tokens("pparker", "totallyNotSpiderman")
 
         client = APIClient()
 
@@ -92,11 +96,3 @@ class ApiTests(APITestCase):
         content = json.loads(response.content)
         self.assertTrue('access' in content)
         self.assertGreaterEqual(len(content['access']), 0)
-
-    def get_tokens(self, username, password=""):
-        url = '/api/token/'
-        data = {'username': str(username), 'password': str(password)}
-        response = self.client.post(url, data, format='json')
-        response.render()
-        content = json.loads(response.content)
-        return content
