@@ -9,7 +9,6 @@ class MemberSerializerAdmin(serializers.ModelSerializer):
 
     # TODO: Ensure this operation triggers a re-calculation of membership scores for this entry.
     def create(self, validated_data):
-
         if not validated_data['phone']:
             raise serializers.ValidationError(
                 {"phone": "A phone number is  required for a member account to be created."}
@@ -38,7 +37,7 @@ class MemberSerializerAdmin(serializers.ModelSerializer):
             position=validated_data['position']
         )
 
-        print("***Successfully created member.***")
+        # print("***Successfully created member.***")
 
         return member
 

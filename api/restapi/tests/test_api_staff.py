@@ -40,7 +40,10 @@ class ApiTests(APITestCase):
         Testing if we can access a record with a valid token.
         """
         token = get_tokens("pparker", "totallyNotSpiderman")['access']
-        url = '/api/v1/member/5/'
+
+        user = User.objects.get(email='peter@avengers.com')
+
+        url = '/api/v1/member/' + str(user.id) + '/'
 
         client = APIClient()
 
@@ -61,6 +64,169 @@ class ApiTests(APITestCase):
         self.assertTrue('address' in content)
         self.assertTrue('member_score' in content)
         self.assertEqual(content['name'], "Pete Parker")
+
+    def test_create_happy_path(self):
+        """
+        Testing if we are able to create a new member account when providing the proper information.
+        """
+        token = get_tokens('pparker', "totallyNotSpiderman")['access']
+        url = '/api/v1/member/'
+
+        client = APIClient()
+
+        client.credentials(HTTP_AUTHORIZATION='Bearer ' + str(token))
+
+        data = {
+            'name': 'Tony Stark',
+            'first_name': "Tony",
+            "last_name": "Stark",
+            "legal_name": "Anthony Stark",
+            "address": "123 Stark Tower",
+            "email": "tony@avengers.com",
+            "phone": "123.456.7894",
+            "rollnumber": "1010",
+            "inactive_flag": True,
+            "abroad_flag": False,
+            "position": "Member"
+        }
+
+        self.assertTrue(User.objects.count(), 1)
+        self.assertTrue(Member.objects.count(), 1)
+
+        response = client.post(url, data=data, format='json')
+
+        response.render()
+        content = json.loads(response.content)
+
+        self.assertEqual(response.status_code, status.HTTP_201_CREATED)
+
+        self.assertEqual(content['name'], "Tony Stark")
+        self.assertEqual(content['phone'], '123.456.7894')
+        self.assertEqual(content['member_score'], -1.0)
+        self.assertEqual(content['temp_password'], True)
+        self.assertEqual(content['present'], 0)
+
+        new_member = Member.objects.get(email="tony@avengers.com")
+        self.assertEqual(new_member.name, "Tony Stark")
+        self.assertEqual(new_member.phone, '123.456.7894')
+        self.assertEqual(new_member.member_score, -1.0)
+        self.assertEqual(new_member.temp_password, True)
+        self.assertEqual(new_member.present, 0)
+
+        new_user = User.objects.get(email="tony@avengers.com")
+        self.assertEqual(new_user.email, "tony@avengers.com")
+        self.assertEqual(new_user.username, 'tony.stark')
+
+    def test_create_user_duplicate_reserved_fields(self):
+        """
+        Testing if we are turned away when trying to create a new member account for a email or phone number that already exists.
+        """
+        token = get_tokens('pparker', "totallyNotSpiderman")['access']
+        url = '/api/v1/member/'
+
+        client = APIClient()
+
+        client.credentials(HTTP_AUTHORIZATION='Bearer ' + str(token))
+
+        # Base request data.
+        data = {
+            'name': 'Tony Stark',
+            'first_name': "Tony",
+            "last_name": "Stark",
+            "legal_name": "Anthony Stark",
+            "address": "123 Stark Tower",
+            "rollnumber": "1010",
+            "inactive_flag": True,
+            "abroad_flag": False,
+            "position": "Member"
+        }
+
+        self.assertTrue(User.objects.count(), 1)
+        self.assertTrue(Member.objects.count(), 1)
+
+        # Test 1: Duplicate email.
+        data['email'] = 'peter@avengers.com'
+        data['phone'] = '123.123.1234'
+        response = client.post(url, data=data, format='json')
+        response.render()
+        content = json.loads(response.content)
+
+        self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
+        self.assertEqual(content['Unable to create'], "I'm sorry, it looks like there's already a user with that email.")
+        self.assertTrue(User.objects.count(), 1)
+        self.assertTrue(Member.objects.count(), 1)
+
+        # Test 2: Duplicate phone number.
+        data['email'] = 'tony@avengers.com'
+        data['phone'] = '123.456.7890'
+        response = client.post(url, data=data, format='json')
+        response.render()
+        content = json.loads(response.content)
+
+        self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
+        self.assertEqual(content['phone'], "A member account with that phone number already exists.")
+        self.assertTrue(User.objects.count(), 1)
+        self.assertTrue(Member.objects.count(), 1)
+
+        # Test 3: Duplicate email and phone number.
+        data['email'] = 'peter@avengers.com'
+        data['phone'] = '123.456.7890'
+        response = client.post(url, data=data, format='json')
+        response.render()
+        content = json.loads(response.content)
+
+        self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
+        self.assertEqual(content['Unable to create'],
+                         "I'm sorry, it looks like there's already a user with that email.")
+        self.assertTrue(User.objects.count(), 1)
+        self.assertTrue(Member.objects.count(), 1)
+
+    def test_create_member_sensitive_fields_overridden(self):
+        """
+        Testing if we try and create a member account with sensative parameters included, they're properly changed before creation.
+        """
+        token = get_tokens('pparker', "totallyNotSpiderman")['access']
+        url = '/api/v1/member/'
+
+        client = APIClient()
+
+        client.credentials(HTTP_AUTHORIZATION='Bearer ' + str(token))
+
+        data = {
+            'name': 'Tony Stark',
+            'first_name': "Tony",
+            "last_name": "Stark",
+            "legal_name": "Anthony Stark",
+            "address": "123 Stark Tower",
+            "email": "tony@avengers.com",
+            "phone": "123.456.7894",
+            "rollnumber": "1010",
+            "inactive_flag": True,
+            "abroad_flag": False,
+            "position": "Member",
+            # Sensative (calculated) fields.
+            "present": 14,
+            "member_score": -15,
+            "temp_password": False
+        }
+
+        self.assertTrue(User.objects.count(), 1)
+        self.assertTrue(Member.objects.count(), 1)
+
+        response = client.post(url, data=data, format='json')
+        response.render()
+        content = json.loads(response.content)
+
+        self.assertEqual(response.status_code, status.HTTP_201_CREATED)
+
+        self.assertEqual(content['member_score'], -1.0)
+        self.assertEqual(content['temp_password'], True)
+        self.assertEqual(content['present'], 0)
+
+        new_member = Member.objects.get(email="tony@avengers.com")
+        self.assertEqual(new_member.member_score, -1.0)
+        self.assertEqual(new_member.temp_password, True)
+        self.assertEqual(new_member.present, 0)
 
     def test_token_get(self):
         """

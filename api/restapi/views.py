@@ -35,6 +35,7 @@ class MemberViewSet(ViewSet):
         # Ensuring there's no monkey-business with the member_score value. It's to be auto-generated.
         validated_data = request.data.copy()
         validated_data['member_score'] = -1
+        validated_data['present'] = 0
 
         # Each time we create a member, we're going to have to create a user, and set a temp password.
         validated_data['temp_password'] = True
@@ -86,7 +87,7 @@ class MemberViewSet(ViewSet):
         password = data.get('name').split(" ")[1] + str(data.get('rollnumber'))
 
         user = User.objects.create(username=username, email=email, password=password)
-        print("***Successfully created user.***")
+        # print("***Successfully created user.***")
         return user.id
 
 

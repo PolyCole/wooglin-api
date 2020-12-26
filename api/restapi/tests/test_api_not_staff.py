@@ -39,8 +39,11 @@ class ApiTests(APITestCase):
         """
         Testing if we can access a record with a valid token.
         """
+
         token = get_tokens("pparker", "totallyNotSpiderman")['access']
-        url = '/api/v1/member/1/'
+
+        user = Member.objects.get(email='peter@avengers.com')
+        url = '/api/v1/member/' + str(user.id) + '/'
 
         client = APIClient()
 
@@ -62,6 +65,45 @@ class ApiTests(APITestCase):
         self.assertTrue('address' not in content)
         self.assertTrue('member_score' not in content)
         self.assertEqual(content['name'], "Pete Parker")
+
+    def test_create_denied(self):
+        """
+        Testing if we are properly turned away when trying to create a record as a non-admin account.
+        """
+        token = get_tokens('pparker', "totallyNotSpiderman")['access']
+        url = '/api/v1/member/'
+
+        client = APIClient()
+
+        client.credentials(HTTP_AUTHORIZATION='Bearer ' + str(token))
+
+        data = {
+            'name': 'Tony Stark',
+            'first_name': "Tony",
+            "last_name": "Stark",
+            "legal_name": "Anthony Stark",
+            "address": "123 Stark Tower",
+            "email": "tony@avengers.com",
+            "phone": "123.456.7890",
+            "rollnumber": "1010",
+            "inactive_flag": True,
+            "position": "Member"
+        }
+
+        self.assertEqual(User.objects.count(), 1)
+        self.assertEqual(Member.objects.count(), 1)
+
+        response = client.post(url, data=data, format='json')
+
+        response.render()
+        content = json.loads(response.content)
+
+        self.assertEqual(User.objects.count(), 1)
+        self.assertEqual(Member.objects.count(), 1)
+
+        self.assertEqual(response.status_code, status.HTTP_403_FORBIDDEN)
+        self.assertEqual(content['detail'], "You do not have permission to perform this action.")
+
 
     def test_token_get(self):
         """
