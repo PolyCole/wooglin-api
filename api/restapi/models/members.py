@@ -13,13 +13,14 @@ class Member(models.Model):
 
     address = models.CharField(max_length=511)
     email = models.CharField(max_length=127)
-    phone = models.CharField(max_length=15, default="000.000.0000", db_index=True)
+    phone = models.CharField(max_length=15, db_index=True)
 
     rollnumber = models.IntegerField()
     member_score = models.FloatField()
 
     inactive_flag = models.BooleanField()
     abroad_flag = models.BooleanField()
+    temp_password = models.BooleanField(default=True)
 
     present = models.IntegerField()
 
