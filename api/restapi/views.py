@@ -60,7 +60,7 @@ class MemberViewSet(ViewSet):
         """
 
         queryset = Member.objects.all()
-        member = get_object_or_404(queryset, user_id=pk)
+        member = get_object_or_404(queryset, id=pk)
         if request.user.is_staff:
             serializer = MemberSerializerAdmin(member)
         else:

@@ -17,7 +17,6 @@ from datetime import timedelta
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
 
-
 # Quick-start development settings - unsuitable for production
 # See https://docs.djangoproject.com/en/3.1/howto/deployment/checklist/
 
@@ -39,7 +38,6 @@ if secrets is None:
 else:
     SECRET_KEY = secrets['SECRET_KEY']
 
-SECRET_KEY = 'mt$um(fmv46!v@5h()a3kqx4v4a_+klnxlb&y!azxq5vr_25#%'
 
 # SECURITY WARNING: don't run with debug turned on in production!
 # if secrets is None:
