@@ -1,11 +1,15 @@
+from attr.filters import exclude
 from rest_framework import serializers
 from .models.members import Member
+from django.contrib.auth.models import User
+import re
 
 
 class MemberSerializerAdmin(serializers.ModelSerializer):
     class Meta:
         model = Member
-        fields = '__all__'
+        # fields = '__all__'
+        exclude = ('user',)
 
     # TODO: Ensure this operation triggers a re-calculation of membership scores for this entry.
     def create(self, validated_data):
@@ -19,8 +23,15 @@ class MemberSerializerAdmin(serializers.ModelSerializer):
                 {"phone": "A member account with that phone number already exists."}
             )
 
+        if User.objects.filter(email=validated_data.get('email')).exists():
+            raise serializers.ValidationError(
+                {"email": "I'm sorry, it looks like there's already a user with that email."}
+            )
+
+        user = self.create_user(validated_data)
+
         member = Member.objects.create(
-            user=validated_data['user'],
+            user=user,
             name=validated_data['name'],
             first_name=validated_data['first_name'],
             last_name=validated_data['last_name'],
@@ -36,7 +47,6 @@ class MemberSerializerAdmin(serializers.ModelSerializer):
             present=0,
             position=validated_data['position']
         )
-
         # print("***Successfully created member.***")
 
         return member
@@ -53,10 +63,30 @@ class MemberSerializerAdmin(serializers.ModelSerializer):
 
     def to_internal_value(self, data):
         # TODO: Email regex check.
+        email = data.get('email')
+        if email:
+            regex = '^[a-z0-9]+[\._]?[a-z0-9]+[@]\w+[.]\w{2,3}$'
+            if not re.search(regex, email):
+                raise serializers.ValidationError({
+                    'email': 'It would appear that you haven\'t entered a valid email address!'
+                })
 
         # TODO: Phone number regex check.
 
         return super(MemberSerializerAdmin, self).to_internal_value(data)
+
+    def create_user(self, data):
+        """
+        Helper method used to create a user.
+        """
+
+        username = data.get('name').lower().replace(" ", ".")
+        email = data.get('email').strip()
+        password = data.get('name').split(" ")[1] + str(data.get('rollnumber'))
+
+        user = User.objects.create(username=username, email=email, password=password)
+        # print("***Successfully created user.***")
+        return user
 
 
 # TODO Determine how these are different.

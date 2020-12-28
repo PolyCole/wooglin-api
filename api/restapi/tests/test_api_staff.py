@@ -2,7 +2,7 @@ from django.contrib.auth.models import User
 from rest_framework import status
 from rest_framework.test import APITestCase, APIClient
 import json
-from .utilities import get_tokens
+from .utilities import get_tokens, get_authed_client
 
 from restapi.models.members import Member
 
@@ -152,7 +152,7 @@ class ApiTests(APITestCase):
         content = json.loads(response.content)
 
         self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
-        self.assertEqual(content['Unable to create'], "I'm sorry, it looks like there's already a user with that email.")
+        self.assertEqual(content['email'], "I'm sorry, it looks like there's already a user with that email.")
         self.assertTrue(User.objects.count(), 1)
         self.assertTrue(Member.objects.count(), 1)
 
@@ -176,8 +176,8 @@ class ApiTests(APITestCase):
         content = json.loads(response.content)
 
         self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
-        self.assertEqual(content['Unable to create'],
-                         "I'm sorry, it looks like there's already a user with that email.")
+        self.assertEqual(content['phone'],
+                         "A member account with that phone number already exists.")
         self.assertTrue(User.objects.count(), 1)
         self.assertTrue(Member.objects.count(), 1)
 
@@ -185,12 +185,9 @@ class ApiTests(APITestCase):
         """
         Testing if we try and create a member account with sensative parameters included, they're properly changed before creation.
         """
-        token = get_tokens('pparker', "totallyNotSpiderman")['access']
         url = '/api/v1/member/'
 
-        client = APIClient()
-
-        client.credentials(HTTP_AUTHORIZATION='Bearer ' + str(token))
+        client = get_authed_client('pparker', 'totallyNotSpiderman')
 
         data = {
             'name': 'Tony Stark',
@@ -243,6 +240,67 @@ class ApiTests(APITestCase):
 
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         self.assertGreater(len(content['access']), 0)
+
+    def test_email_regex_create(self):
+        url = '/api/v1/member/'
+        client = get_authed_client('pparker', 'totallyNotSpiderman')
+
+        data = {
+            'name': 'Tony Stark',
+            'first_name': "Tony",
+            "last_name": "Stark",
+            "legal_name": "Anthony Stark",
+            "address": "123 Stark Tower",
+            "email": "tony@avengers.com",
+            "phone": "123.456.7894",
+            "rollnumber": "1010",
+            "inactive_flag": True,
+            "abroad_flag": False,
+            "position": "Member"
+        }
+
+        self.assertTrue(User.objects.count(), 1)
+        self.assertTrue(Member.objects.count(), 1)
+
+        # Testing with 'tonyavengers.com'
+        self.bogus_email_test(client, data, 'tonyavengers.com')
+
+        # Testing with '@avengers.com'
+        self.bogus_email_test(client, data, '@avengers.com')
+
+        # Testing with ' @avengers.com'
+        self.bogus_email_test(client, data, ' @avengers.com')
+
+        # Testing with 'tony@aven gers.com'
+        self.bogus_email_test(client, data, 'tony@aven gers.com')
+
+        # Testing with 'tony@avengers'
+        self.bogus_email_test(client, data, 'tony@avengers')
+
+        # Testing with 't @avengers.co'
+        self.bogus_email_test(client, data, 't @avengers.co')
+
+        # Testing with ' @avengers.com' ** VALID **
+        data['email'] = 'tony@avengers.com'
+        response = client.post(url, data=data, format='json')
+        response.render()
+        content = json.loads(response.content)
+        self.assertEqual(response.status_code, status.HTTP_201_CREATED)
+        self.assertTrue('name' in content)
+        self.assertTrue('legal_name' in content)
+        self.assertTrue(User.objects.count(), 2)
+        self.assertTrue(Member.objects.count(), 2)
+
+    def bogus_email_test(self, client, data, email):
+        data['email'] = "@avengers.com"
+        response = client.post('/api/v1/member/', data=data, format='json')
+        response.render()
+        content = json.loads(response.content)
+        self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
+        self.assertEqual(content['email'], "It would appear that you haven't entered a valid email address!")
+        self.assertTrue(User.objects.count(), 1)
+        self.assertTrue(Member.objects.count(), 1)
+
 
     def test_token_refresh(self):
         """

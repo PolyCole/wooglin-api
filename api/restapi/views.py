@@ -40,13 +40,6 @@ class MemberViewSet(ViewSet):
         # Each time we create a member, we're going to have to create a user, and set a temp password.
         validated_data['temp_password'] = True
 
-        if User.objects.filter(email=validated_data.get('email')).exists():
-            return Response({"Unable to create": "I'm sorry, it looks like there's already a user with that email."},
-                            status.HTTP_400_BAD_REQUEST)
-
-        user_id = self.create_user(validated_data)
-        validated_data['user'] = user_id
-
         serializer = MemberSerializerAdmin(data=validated_data)
 
         if serializer.is_valid():
@@ -76,19 +69,6 @@ class MemberViewSet(ViewSet):
 
     # def destroy(self, request, pk=None):
     #     pass
-
-    def create_user(self, data):
-        """
-        Helper method used to create a user.
-        """
-
-        username = data.get('name').lower().replace(" ", ".")
-        email = data.get('email').strip()
-        password = data.get('name').split(" ")[1] + str(data.get('rollnumber'))
-
-        user = User.objects.create(username=username, email=email, password=password)
-        # print("***Successfully created user.***")
-        return user.id
 
 
     def get_permissions(self):
