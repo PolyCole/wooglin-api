@@ -62,16 +62,24 @@ class MemberSerializerAdmin(serializers.ModelSerializer):
         return None
 
     def to_internal_value(self, data):
-        # TODO: Email regex check.
-        email = data.get('email')
-        if email:
-            regex = '^[a-z0-9]+[\._]?[a-z0-9]+[@]\w+[.]\w{2,3}$'
-            if not re.search(regex, email):
-                raise serializers.ValidationError({
-                    'email': 'It would appear that you haven\'t entered a valid email address!'
-                })
+        if 'email' in data:
+            email = data.get('email')
+            if email:
+                regex = '^[a-z0-9]+[\._]?[a-z0-9]+[@]\w+[.]\w{2,3}$'
+                if not re.search(regex, email):
+                    raise serializers.ValidationError({
+                        'email': 'It would appear that you haven\'t entered a valid email address!'
+                    })
 
-        # TODO: Phone number regex check.
+        if 'phone' in data:
+            phone = data.get('phone')
+            if phone:
+                regex = '^\d{3}\.\d{3}\.\d{4}$'
+                if not re.search(regex, phone):
+                    raise serializers.ValidationError({
+                        'phone': 'Phone number is in an improper format. Please make sure the phone number is in the form '
+                                 'xxx.xxx.xxxx'
+                    })
 
         return super(MemberSerializerAdmin, self).to_internal_value(data)
 

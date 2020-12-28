@@ -262,25 +262,17 @@ class ApiTests(APITestCase):
         self.assertTrue(User.objects.count(), 1)
         self.assertTrue(Member.objects.count(), 1)
 
-        # Testing with 'tonyavengers.com'
+        # Just a buncha invalid email addresses
         self.bogus_email_test(client, data, 'tonyavengers.com')
-
-        # Testing with '@avengers.com'
         self.bogus_email_test(client, data, '@avengers.com')
-
-        # Testing with ' @avengers.com'
         self.bogus_email_test(client, data, ' @avengers.com')
-
-        # Testing with 'tony@aven gers.com'
         self.bogus_email_test(client, data, 'tony@aven gers.com')
-
-        # Testing with 'tony@avengers'
         self.bogus_email_test(client, data, 'tony@avengers')
-
-        # Testing with 't @avengers.co'
         self.bogus_email_test(client, data, 't @avengers.co')
+        self.bogus_email_test(client, data, '123.456.7890')
+        self.bogus_email_test(client, data, 'Hello world!')
 
-        # Testing with ' @avengers.com' ** VALID **
+        # Testing a VALID email address
         data['email'] = 'tony@avengers.com'
         response = client.post(url, data=data, format='json')
         response.render()
@@ -291,16 +283,48 @@ class ApiTests(APITestCase):
         self.assertTrue(User.objects.count(), 2)
         self.assertTrue(Member.objects.count(), 2)
 
-    def bogus_email_test(self, client, data, email):
-        data['email'] = "@avengers.com"
-        response = client.post('/api/v1/member/', data=data, format='json')
-        response.render()
-        content = json.loads(response.content)
-        self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
-        self.assertEqual(content['email'], "It would appear that you haven't entered a valid email address!")
+    def test_phone_regex_create(self):
+        url = '/api/v1/member/'
+        client = get_authed_client('pparker', 'totallyNotSpiderman')
+
+        data = {
+            'name': 'Tony Stark',
+            'first_name': "Tony",
+            "last_name": "Stark",
+            "legal_name": "Anthony Stark",
+            "address": "123 Stark Tower",
+            "email": "tony@avengers.com",
+            "phone": "1234567894",
+            "rollnumber": "1010",
+            "inactive_flag": True,
+            "abroad_flag": False,
+            "position": "Member"
+        }
+
         self.assertTrue(User.objects.count(), 1)
         self.assertTrue(Member.objects.count(), 1)
 
+        # Just a buncha invalid phone numbers
+        self.bogus_phone_test(client, data, '123.456.789')
+        self.bogus_phone_test(client, data, '1.1.1.1.1.1.1')
+        self.bogus_phone_test(client, data, '192.168.0.1')
+        self.bogus_phone_test(client, data, '1234567890')
+        self.bogus_phone_test(client, data, '(123)-456-7890')
+        self.bogus_phone_test(client, data, '123-456-7890')
+        self.bogus_phone_test(client, data, '(123).456.7890')
+        self.bogus_phone_test(client, data, '(123.456.6798')
+        self.bogus_phone_test(client, data, 'Hello world!')
+
+        # Testing a VALID phone number
+        data['phone'] = '234.724.2342'
+        response = client.post(url, data=data, format='json')
+        response.render()
+        content = json.loads(response.content)
+        self.assertEqual(response.status_code, status.HTTP_201_CREATED)
+        self.assertTrue('name' in content)
+        self.assertTrue('legal_name' in content)
+        self.assertTrue(User.objects.count(), 2)
+        self.assertTrue(Member.objects.count(), 2)
 
     def test_token_refresh(self):
         """
@@ -320,3 +344,23 @@ class ApiTests(APITestCase):
         self.assertTrue('access' in content)
         self.assertGreaterEqual(len(content['access']), 0)
 
+    def bogus_email_test(self, client, data, email):
+        data['email'] = email
+        response = client.post('/api/v1/member/', data=data, format='json')
+        response.render()
+        content = json.loads(response.content)
+        self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
+        self.assertEqual(content['email'], "It would appear that you haven't entered a valid email address!")
+        self.assertTrue(User.objects.count(), 1)
+        self.assertTrue(Member.objects.count(), 1)
+
+    def bogus_phone_test(self, client, data, phone):
+        data['phone'] = phone
+        response = client.post('/api/v1/member/', data=data, format='json')
+        response.render()
+        content = json.loads(response.content)
+        self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
+        self.assertEqual(content['phone'], "Phone number is in an improper format. Please make sure the phone number "
+                                           "is in the form xxx.xxx.xxxx")
+        self.assertTrue(User.objects.count(), 1)
+        self.assertTrue(Member.objects.count(), 1)
