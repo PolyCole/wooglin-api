@@ -4,6 +4,8 @@ from rest_framework.viewsets import ViewSet
 from rest_framework.permissions import IsAuthenticated, IsAdminUser
 from rest_framework.response import Response
 from rest_framework import status
+from rest_framework.settings import api_settings
+
 
 from restapi.models.members import Member
 from django.contrib.auth.models import User
@@ -11,21 +13,46 @@ from django.contrib.auth.models import User
 from .serializers import MemberSerializerAdmin
 from .serializers import MemberSerializerNonAdmin
 
+from restapi.mixins import MyPaginationMixin
 
-class MemberViewSet(ViewSet):
+
+class MemberViewSet(ViewSet, MyPaginationMixin):
+    pagination_class = api_settings.DEFAULT_PAGINATION_CLASS
+
     def list(self, request):
         """
         Lists the member records in the database.
         """
+        if request.user.is_staff:
+            response_object = self.list_admin(request)
+        else:
+            response_object = self.list_nonadmin(request)
 
+
+        return response_object
+
+    def list_admin(self, request):
         data = Member.objects.all().order_by('rollnumber')
 
-        if request.user.is_staff:
+        page = self.paginate_queryset(data)
+        if page is not None:
+            serializer = MemberSerializerAdmin(page, many=True)
+            return self.get_paginated_response(serializer.data)
+        else:
             serializer = MemberSerializerAdmin(data, many=True)
+            return serializer.data
+
+    def list_nonadmin(self, request):
+        data = Member.objects.all().order_by('rollnumber')
+
+        page = self.paginate_queryset(data)
+        if page is not None:
+            serializer = MemberSerializerNonAdmin(page, many=True)
+            return self.get_paginated_response(serializer.data)
         else:
             serializer = MemberSerializerNonAdmin(data, many=True)
+            return serializer.data
 
-        return Response(serializer.data)
 
     def create(self, request):
         """
