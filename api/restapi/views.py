@@ -15,10 +15,13 @@ from .serializers import MemberSerializerNonAdmin
 
 from restapi.mixins import MyPaginationMixin
 
+from .data_utilities import apply_search_filters
+
 
 class MemberViewSet(ViewSet, MyPaginationMixin):
     pagination_class = api_settings.DEFAULT_PAGINATION_CLASS
 
+    # TODO: I think there's room for optimization and code cleanup here.
     def list(self, request):
         """
         Lists the member records in the database.
@@ -32,6 +35,7 @@ class MemberViewSet(ViewSet, MyPaginationMixin):
 
     def list_admin(self, request):
         data = Member.objects.all().order_by('rollnumber')
+        data = apply_search_filters(data, request.query_params, request.user.is_staff)
 
         page = self.paginate_queryset(data)
         if page is not None:
@@ -43,6 +47,7 @@ class MemberViewSet(ViewSet, MyPaginationMixin):
 
     def list_nonadmin(self, request):
         data = Member.objects.all().order_by('rollnumber')
+        data = apply_search_filters(data, request.query_params, request.user.is_staff)
 
         page = self.paginate_queryset(data)
         if page is not None:
@@ -77,8 +82,8 @@ class MemberViewSet(ViewSet, MyPaginationMixin):
         """
         Gets a single member record from the table.
         """
-
         queryset = Member.objects.all()
+
         member = get_object_or_404(queryset, id=pk)
         if request.user.is_staff:
             serializer = MemberSerializerAdmin(member)
