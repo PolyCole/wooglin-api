@@ -2,7 +2,7 @@ from django.contrib.auth.models import User
 from rest_framework import status
 from rest_framework.test import APITestCase, APIClient
 import json
-from .utilities import get_tokens, get_authed_client, generate_fake_new_user
+from .testing_utilities import get_tokens, get_authed_client, generate_fake_new_user
 
 from restapi.models.members import Member
 
