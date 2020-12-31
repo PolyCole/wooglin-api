@@ -1,5 +1,11 @@
 import json
+import random
+
+from django.contrib.auth.models import User
+from faker import Faker
 from rest_framework.test import APIClient
+
+from restapi.models.members import Member
 
 
 def get_tokens(username, password=""):
@@ -17,3 +23,53 @@ def get_authed_client(username, password):
     client = APIClient()
     client.credentials(HTTP_AUTHORIZATION='Bearer ' + str(token))
     return client
+
+
+def generate_fake_new_user():
+    fake = Faker()
+
+    name = fake.name()
+    email = fake.email()
+    phone = get_phone()
+
+    # Ensuring we don't have an accidental collision in the db.
+    # Super rare probabilistically, but still.
+    while Member.objects.filter(phone=phone).count() != 0:
+        phone = get_phone()
+
+    user_account = User.objects.create_user(
+        name,
+        email,
+        fake.password(),
+        is_staff=False
+    )
+
+    Member.objects.create(
+        user=user_account,
+        name=name,
+        first_name=fake.first_name(),
+        last_name=fake.last_name(),
+        legal_name=name,
+        address=fake.address(),
+        email=email,
+        phone=get_phone(),
+        rollnumber=Member.objects.count() + 1,
+        member_score=random.randint(0,100),
+        inactive_flag=False,
+        abroad_flag=False,
+        present=random.randint(0, 50),
+        position="Test Member"
+    )
+
+    return 1
+
+
+# Generates a random phone number of a standard xxx.xxx.xxxx format.
+def get_phone():
+    random.seed()
+    number = ""
+    for x in range(0, 2):
+        number += str(random.randint(0, 1000))
+        number += "."
+    number += str(random.randint(0, 10000))
+    return number

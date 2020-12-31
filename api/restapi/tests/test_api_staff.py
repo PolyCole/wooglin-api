@@ -2,7 +2,7 @@ from django.contrib.auth.models import User
 from rest_framework import status
 from rest_framework.test import APITestCase, APIClient
 import json
-from .utilities import get_tokens, get_authed_client
+from .utilities import get_tokens, get_authed_client, generate_fake_new_user
 
 from restapi.models.members import Member
 
@@ -224,6 +224,38 @@ class ApiTests(APITestCase):
         self.assertEqual(new_member.member_score, -1.0)
         self.assertEqual(new_member.temp_password, True)
         self.assertEqual(new_member.present, 0)
+
+    def test_pagination(self):
+        """
+        Testing that the Members table successfully paginates.
+        """
+        url = '/api/v1/member/'
+        client = get_authed_client('pparker', 'totallyNotSpiderman')
+
+        # First, let's ensure that the API paginates by default.
+        response = client.get(url, format='json')
+        response.render()
+        content = json.loads(response.content)
+
+        self.assertTrue('count' in content)
+        self.assertTrue('next' in content)
+        self.assertTrue('previous' in content)
+        self.assertEqual(content['previous'], None)
+        self.assertEqual(content['count'], 1)
+
+        # Now, let's populate the table with a few more user objects and then try actual pagination.
+        for x in range(0, 25):
+            generate_fake_new_user()
+
+        url = '/api/v1/member/?page=1'
+        response = client.get(url, format='json')
+        response.render()
+        content = json.loads(response.content)
+
+        self.assertEqual(Member.objects.count(), 26)
+        self.assertEqual(content['count'], 26)
+        self.assertEqual(content['next'], 'http://testserver/api/v1/member/?page=2')
+        self.assertEqual(content['previous'], None)
 
     def test_token_get(self):
         """

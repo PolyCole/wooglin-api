@@ -28,7 +28,6 @@ class MemberViewSet(ViewSet, MyPaginationMixin):
         else:
             response_object = self.list_nonadmin(request)
 
-
         return response_object
 
     def list_admin(self, request):
