@@ -1,6 +1,9 @@
+protected_fields = ['member_score', 'address', 'present', 'temp_password']
 
 
 # TODO Need to write test cases for this.
+# TODO: There's definitely room for optimization here. Need to implement the industry standard filtering method.
+#  Need to move on now though.
 def apply_search_filters(data, query_params, is_staff=False):
     if 'phone' in query_params:
         data = data.filter(phone=query_params['phone'])
@@ -15,5 +18,29 @@ def apply_search_filters(data, query_params, is_staff=False):
     if is_staff:
         if 'member_score' in query_params:
             data = data.filter(member_score=query_params['member_score'])
+
+    return data
+
+
+# TODO Need to write test cases for this.
+# TODO Implement best practices here.
+def apply_ordering(data, query_params, is_staff=False):
+    order_operations = query_params['order_by'].split(",")
+
+    for order_request in order_operations:
+        processed = order_request.split(".")
+
+        operation = processed[0]
+
+        if processed[1] == "desc":
+            operation = "-" + operation
+
+        if processed[0] in protected_fields:
+            if is_staff:
+                data = data.order_by(operation)
+            else:
+                return "You've attempted to sort by a field you do not have permission to view."
+        else:
+            data = data.order_by(operation)
 
     return data

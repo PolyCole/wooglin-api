@@ -1,3 +1,5 @@
+import re
+
 from django.shortcuts import get_object_or_404
 
 from rest_framework.viewsets import ViewSet
@@ -15,7 +17,7 @@ from .serializers import MemberSerializerNonAdmin
 
 from restapi.mixins import MyPaginationMixin
 
-from .data_utilities import apply_search_filters
+from .data_utilities import apply_search_filters, apply_ordering
 
 
 class MemberViewSet(ViewSet, MyPaginationMixin):
@@ -26,17 +28,37 @@ class MemberViewSet(ViewSet, MyPaginationMixin):
         """
         Lists the member records in the database.
         """
+        data = Member.objects.all()
+        data = apply_search_filters(data, request.query_params, request.user.is_staff)
+
+        # Processing our orderby requess.
+        if 'order_by' in request.query_params:
+            operations = request.query_params['order_by'].split(",")
+
+            for op in operations:
+                # Ensuring the commands are in the format we expect.
+                regex = '^([a-z_]+)\.(asc|desc)$'
+                if re.search(regex, op) is None:
+                    return Response({
+                        "order_by": "One or more of your ordering parameters are formatted incorrectly. Please ensure "
+                                    "they follow the format: ?order_by=name.asc,phone.desc "
+                    }, status.HTTP_400_BAD_REQUEST)
+
+            data = apply_ordering(data, request.query_params, request.user.is_staff)
+
+            if type(data) is str:
+                return Response({
+                    "order_by": str(data)
+                }, status.HTTP_403_FORBIDDEN)
+
         if request.user.is_staff:
-            response_object = self.list_admin(request)
+            response_object = self.list_admin(request, data)
         else:
-            response_object = self.list_nonadmin(request)
+            response_object = self.list_nonadmin(request, data)
 
         return response_object
 
-    def list_admin(self, request):
-        data = Member.objects.all().order_by('rollnumber')
-        data = apply_search_filters(data, request.query_params, request.user.is_staff)
-
+    def list_admin(self, request, data):
         page = self.paginate_queryset(data)
         if page is not None:
             serializer = MemberSerializerAdmin(page, many=True)
@@ -45,10 +67,7 @@ class MemberViewSet(ViewSet, MyPaginationMixin):
             serializer = MemberSerializerAdmin(data, many=True)
             return serializer.data
 
-    def list_nonadmin(self, request):
-        data = Member.objects.all().order_by('rollnumber')
-        data = apply_search_filters(data, request.query_params, request.user.is_staff)
-
+    def list_nonadmin(self, request, data):
         page = self.paginate_queryset(data)
         if page is not None:
             serializer = MemberSerializerNonAdmin(page, many=True)
