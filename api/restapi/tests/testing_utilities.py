@@ -25,7 +25,7 @@ def get_authed_client(username, password):
     return client
 
 
-def generate_fake_new_user():
+def generate_fake_new_user(is_staff=False):
     fake = Faker()
 
     name = fake.name()
@@ -37,14 +37,17 @@ def generate_fake_new_user():
     while Member.objects.filter(phone=phone).count() != 0:
         phone = get_phone()
 
+    while Member.objects.filter(name=name).count() != 0:
+        name = fake.name()
+
     user_account = User.objects.create_user(
         name,
         email,
-        fake.password(),
-        is_staff=False
+        "fake_password",
+        is_staff=is_staff
     )
 
-    Member.objects.create(
+    member = Member.objects.create(
         user=user_account,
         name=name,
         first_name=fake.first_name(),
@@ -61,7 +64,7 @@ def generate_fake_new_user():
         position="Test Member"
     )
 
-    return 1
+    return member
 
 
 # Generates a random phone number of a standard xxx.xxx.xxxx format.
@@ -73,3 +76,8 @@ def get_phone():
         number += "."
     number += str(random.randint(0, 10000))
     return number
+
+
+def get_response_content(response):
+    response.render()
+    return json.loads(response.content)
