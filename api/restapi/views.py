@@ -15,12 +15,12 @@ from django.contrib.auth.models import User
 from .serializers import MemberSerializerAdmin
 from .serializers import MemberSerializerNonAdmin
 
-from restapi.mixins import MyPaginationMixin
+from restapi.mixins import CustomPaginationMixin
 
 from .data_utilities import apply_search_filters, apply_ordering
 
 
-class MemberViewSet(ViewSet, MyPaginationMixin):
+class MemberViewSet(ViewSet, CustomPaginationMixin):
     pagination_class = api_settings.DEFAULT_PAGINATION_CLASS
 
     # TODO: I think there's room for optimization and code cleanup here.
@@ -28,7 +28,7 @@ class MemberViewSet(ViewSet, MyPaginationMixin):
         """
         Lists the member records in the database.
         """
-        data = Member.objects.all()
+        data = Member.objects.all().order_by('id')
         data = apply_search_filters(data, request.query_params, request.user.is_staff)
 
         # Processing our orderby requess.

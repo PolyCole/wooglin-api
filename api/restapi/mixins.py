@@ -1,4 +1,4 @@
-class MyPaginationMixin(object):
+class CustomPaginationMixin(object):
 
     @property
     def paginator(self):
