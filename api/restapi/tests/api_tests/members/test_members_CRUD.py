@@ -34,34 +34,6 @@ class ApiTests(APITestCase):
         response = self.client.get('/api/v1/member/', format='json')
         self.assertEqual(response.status_code, status.HTTP_401_UNAUTHORIZED)
 
-    # Getting with an admin token
-    def test_authed_get_admin_acct(self):
-        member = generate_fake_new_user(True)
-
-        token = get_tokens(member.name, "fake_password")['access']
-        user = User.objects.get(email=member.email)
-
-        url = '/api/v1/member/' + str(user.id) + '/'
-
-        client = APIClient()
-
-        # Trying to get with bogus token
-        client.credentials(HTTP_AUTHORIZATION='Bearer ' + 'helloworld')
-        response = client.get(url, data={'format': 'json'})
-        self.assertEqual(response.status_code, status.HTTP_401_UNAUTHORIZED)
-
-        # Getting with a legitimate token.
-        client.credentials(HTTP_AUTHORIZATION='Bearer ' + str(token))
-        response = client.get(url, data={'format': 'json'})
-        content = get_response_content(response)
-
-        self.assertEqual(response.status_code, status.HTTP_200_OK)
-
-        self.assertTrue('name' in content)
-        self.assertTrue('address' in content)
-        self.assertTrue('member_score' in content)
-        self.assertEqual(content['name'], member.name)
-
     # Getting with a non-admin token.
     def test_authed_get_nonadmin_acct(self):
         member = generate_fake_new_user(False)
@@ -88,6 +60,34 @@ class ApiTests(APITestCase):
         self.assertTrue('name' in content)
         self.assertTrue('address' not in content)
         self.assertTrue('member_score' not in content)
+        self.assertEqual(content['name'], member.name)
+
+    # Getting with an admin token
+    def test_authed_get_admin_acct(self):
+        member = generate_fake_new_user(True)
+
+        token = get_tokens(member.name, "fake_password")['access']
+        user = User.objects.get(email=member.email)
+
+        url = '/api/v1/member/' + str(user.id) + '/'
+
+        client = APIClient()
+
+        # Trying to get with bogus token
+        client.credentials(HTTP_AUTHORIZATION='Bearer ' + 'helloworld')
+        response = client.get(url, data={'format': 'json'})
+        self.assertEqual(response.status_code, status.HTTP_401_UNAUTHORIZED)
+
+        # Getting with a legitimate token.
+        client.credentials(HTTP_AUTHORIZATION='Bearer ' + str(token))
+        response = client.get(url, data={'format': 'json'})
+        content = get_response_content(response)
+
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+
+        self.assertTrue('name' in content)
+        self.assertTrue('address' in content)
+        self.assertTrue('member_score' in content)
         self.assertEqual(content['name'], member.name)
 
     # Ensuring the API properly paginates on the list operation.
@@ -122,6 +122,75 @@ class ApiTests(APITestCase):
         self.assertEqual(content['count'], 26)
         self.assertEqual(content['next'], 'http://testserver/api/v1/member/?page=2')
         self.assertEqual(content['previous'], None)
+
+    # Getting with a non-admin token based on defined query parameters.
+    def test_get_with_query_parameters_non_admin(self):
+        member = generate_fake_new_user(False)
+        token = get_tokens(member.name, "fake_password")['access']
+
+        client = APIClient()
+        client.credentials(HTTP_AUTHORIZATION='Bearer ' + str(token))
+
+        # Ensuring invalid search parameters are ignored, and treated like a regular request.
+        url = '/api/v1/member/?test=123'
+        content = get_response_content(client.get(url, data={'format': 'json'}))
+
+        self.assertEqual(content['count'], 2)
+        self.assertTrue('results' in content)
+
+        member_objects = content['results']
+        self.assertTrue('member_score' not in member_objects[0])
+        self.assertTrue('address' not in member_objects[0])
+
+        # Attempting to search with a valid search parameter:
+        name_arg = str(urlify(member.name, len(member.name)))
+        url = '/api/v1/member/?name=' + name_arg
+        content = get_response_content(client.get(url, data={'name': str(name_arg)}))
+
+        self.assertEqual(content['count'], 1)
+        member_objects = content['results']
+        self.assertEqual(len(member_objects), 1)
+        self.assertEqual(member_objects[0]['name'], member.name)
+        self.assertTrue('member_score' not in member_objects[0])
+        self.assertTrue('address' not in member_objects[0])
+
+        # Attempting to search by a parameter we don't have access to.
+        # Expected behavior: Ignored completely.
+        url = '/api/v1/member/?member_score=' + str(23.4)
+        content = get_response_content(client.get(url, data={'member_score': str(23.4)}))
+
+        self.assertTrue('count' in content)
+        self.assertEqual(content['count'], 2)
+        self.assertEqual(len(content['results']), 2)
+        self.assertTrue('member_score' not in content['results'][0])
+        self.assertTrue('address' not in content['results'][0])
+
+    # Getting with an admin token based on defined query parameters.
+    def test_get_with_query_parameters(self):
+        member = generate_fake_new_user(True)
+        token = get_tokens(member.name, "fake_password")['access']
+
+        client = APIClient()
+        client.credentials(HTTP_AUTHORIZATION='Bearer ' + str(token))
+
+        # Ensuring invalid search parameters are ignored, and treated like a regular request.
+        url = '/api/v1/member/?test=123'
+        content = get_response_content(client.get(url, data={'format': 'json'}))
+
+        self.assertEqual(content['count'], 2)
+        self.assertTrue('results' in content)
+
+        # Attempting to search with a valid search parameter:
+        name_arg = str(urlify(member.name, len(member.name)))
+        url = '/api/v1/member/?name=' + name_arg
+        content = get_response_content(client.get(url, data={'name': str(name_arg)}))
+
+        self.assertEqual(content['count'], 1)
+        member_objects = content['results']
+        self.assertEqual(len(member_objects), 1)
+        self.assertTrue('name' in member_objects[0])
+        self.assertEqual(member_objects[0]['name'], member.name)
+        self.assertTrue('member_score' in member_objects[0])
 
     # Creating a member with a non-admin token.
     def test_create_operation_denied(self):

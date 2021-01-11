@@ -9,7 +9,8 @@ def apply_search_filters(data, query_params, is_staff=False):
         data = data.filter(phone=query_params['phone'])
 
     if 'name' in query_params:
-        data = data.filter(name=query_params['name'])
+        name = de_urlify(query_params['name'], len(query_params['name']))
+        data = data.filter(name=name)
 
     if 'abroad_flag' in query_params:
         data = data.filter(abroad_flag=query_params['abroad_flag'])
@@ -44,3 +45,8 @@ def apply_ordering(data, query_params, is_staff=False):
             data = data.order_by(operation)
 
     return data
+
+
+# Takes a string and returns the string in normal format.
+def de_urlify(in_string, in_string_length):
+    return in_string[:in_string_length].replace('%20', ' ')

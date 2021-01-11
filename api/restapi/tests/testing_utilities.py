@@ -78,6 +78,14 @@ def get_phone():
     return number
 
 
+# Resolves the given response and returns its content.
 def get_response_content(response):
     response.render()
     return json.loads(response.content)
+
+
+# Takes a string and returns the string in url-format.
+def urlify(in_string, in_string_length):
+    return in_string[:in_string_length].replace(' ', '%20')
+
+
