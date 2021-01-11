@@ -1,9 +1,7 @@
 protected_fields = ['member_score', 'address', 'present', 'temp_password']
 
 
-# TODO Need to write test cases for this.
-# TODO: There's definitely room for optimization here. Need to implement the industry standard filtering method.
-#  Need to move on now though.
+# TODO: Clean this up and add in a few more search luxuries, like fuzzy matching and general multi-field search.
 def apply_search_filters(data, query_params, is_staff=False):
     if 'phone' in query_params:
         data = data.filter(phone=query_params['phone'])
@@ -19,6 +17,9 @@ def apply_search_filters(data, query_params, is_staff=False):
     if is_staff:
         if 'member_score' in query_params:
             data = data.filter(member_score=query_params['member_score'])
+
+        if 'address' in query_params:
+            data = data.filter(address=query_params['address'])
 
     return data
 
