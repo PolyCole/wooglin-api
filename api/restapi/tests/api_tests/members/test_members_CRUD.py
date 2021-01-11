@@ -476,12 +476,17 @@ class ApiTests(APITestCase):
         client = APIClient()
         client.credentials(HTTP_AUTHORIZATION='Bearer ' + str(token))
 
+        self.assertEqual(Member.objects.count(), 2)
+        self.assertEqual(User.objects.count(), 2)
+
         response = client.delete(url, format='json')
         content = get_response_content(response)
 
         self.assertEqual(response.status_code, status.HTTP_403_FORBIDDEN)
         self.assertTrue('detail' in content)
         self.assertEqual(content['detail'], 'You do not have permission to perform this action.')
+        self.assertEqual(Member.objects.count(), 2)
+        self.assertEqual(User.objects.count(), 2)
 
     # Trying to delete with an admin token.
     def test_delete(self):
@@ -492,12 +497,16 @@ class ApiTests(APITestCase):
         client.credentials(HTTP_AUTHORIZATION='Bearer ' + str(token))
 
         url = '/api/v1/member/'
+        members_before, users_before = Member.objects.count(), User.objects.count()
         response = client.delete(url, format='json')
         content = get_response_content(response)
 
         self.assertEqual(response.status_code, status.HTTP_405_METHOD_NOT_ALLOWED)
         self.assertTrue('detail' in content)
         self.assertEqual(content['detail'], 'Method "DELETE" not allowed.')
+
+        self.assertEqual(Member.objects.count(), members_before)
+        self.assertEqual(User.objects.count(), users_before)
 
         url = '/api/v1/member/123/'
         response = client.delete(url, format='json')
@@ -506,16 +515,20 @@ class ApiTests(APITestCase):
         self.assertEqual(response.status_code, status.HTTP_404_NOT_FOUND)
         self.assertTrue('primary_key' in content)
         self.assertEqual(content['primary_key'], "The specified primary key does not exist.")
+        self.assertEqual(Member.objects.count(), members_before)
+        self.assertEqual(User.objects.count(), users_before)
 
         to_delete_member = generate_fake_new_user(False)
 
-        self.assertEqual(Member.objects.count(), 3)
+        members_before, users_before = Member.objects.count(), User.objects.count()
+
         url = '/api/v1/member/' + str(to_delete_member.id) + "/"
         response = client.delete(url, format='json')
 
         self.assertEqual(response.status_code, status.HTTP_204_NO_CONTENT)
-        self.assertEqual(Member.objects.count(), 2)
         self.assertEqual(Member.objects.filter(id=to_delete_member.id).count(), 0)
+        self.assertEqual(Member.objects.count(), members_before - 1)
+        self.assertEqual(User.objects.count(), users_before - 1)
 
     # Helper method for improper email formats.
     def bogus_email_test(self, client, data, email):

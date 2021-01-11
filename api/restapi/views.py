@@ -133,6 +133,8 @@ class MemberViewSet(ViewSet, CustomPaginationMixin):
 
         if queryset:
             Member.objects.filter(id=pk).delete()
+            members = list(queryset)
+            User.objects.filter(email=members[0].email).delete()
             return Response(
                 {'delete': 'The delete operation has completed successfully. If this has been done in error, '
                            'contact your Administrator.'},
