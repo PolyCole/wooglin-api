@@ -53,13 +53,13 @@ class MemberSerializerAdmin(serializers.ModelSerializer):
 
     # TODO: Ensure this triggers a re-calculation of membership scores for this entry.
     # TODO: Determine when a global membership_score update should occur.
-    def update(self, validated_data):
-        if validated_data.get('member_score'):
-            raise serializers.ValidationError({
-                'member_score': 'This field is auto-generated and cannot be updated manually during a PATCH.'
-            })
+    def update(self, member_acct, new_data):
+        for field in new_data:
+            setattr(member_acct, field, new_data[field])
 
-        return None
+        member_acct.save()
+
+        return member_acct
 
     def to_internal_value(self, data):
         if 'email' in data:

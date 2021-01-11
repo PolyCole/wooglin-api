@@ -530,6 +530,79 @@ class ApiTests(APITestCase):
         self.assertEqual(Member.objects.count(), members_before - 1)
         self.assertEqual(User.objects.count(), users_before - 1)
 
+    # Trying to update a model without the proper perms.
+    def test_partial_update_forbidden(self):
+        member = generate_fake_new_user(False)
+        token = get_tokens(member.name, "fake_password")['access']
+
+        url = '/api/v1/member/' + str(member.id) + "/"
+
+        client = APIClient()
+        client.credentials(HTTP_AUTHORIZATION='Bearer ' + str(token))
+
+        data = {'name': 'Cole Polyak'}
+        response = client.patch(url, data=data, format='json')
+        content = get_response_content(response)
+
+        self.assertEqual(response.status_code, status.HTTP_403_FORBIDDEN)
+
+        db_member = Member.objects.filter(email=member.email)[0]
+        self.assertEqual(db_member.name, member.name)
+        self.assertTrue('detail' in content)
+        self.assertEqual(content['detail'], 'You do not have permission to perform this action.')
+
+    # Trying to update a model without the proper perms.
+    def test_partial_update(self):
+        member = generate_fake_new_user(True)
+        token = get_tokens(member.name, "fake_password")['access']
+
+        url = '/api/v1/member/' + str(member.id) + "/"
+
+        client = APIClient()
+        client.credentials(HTTP_AUTHORIZATION='Bearer ' + str(token))
+
+        # Checking to see that calculated fields are un-patch-able.
+        data = {'member_score': 13.4, 'present': 23}
+        response = client.patch(url, data=data, format='json')
+        content = get_response_content(response)
+
+        self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
+        self.assertTrue('member_score' in content)
+        self.assertEqual(content['member_score'], 'member_score is a calculated field and cannot be updated via PATCH.')
+        self.assertTrue('present' in content)
+        self.assertEqual(content['present'], 'present is a calculated field and cannot be updated via PATCH.')
+
+        # Randomly specified fields are ignored by the API.
+        data = {'name': 'Cole Polyak', 'hello': 'world'}
+        response = client.patch(url, data=data, format='json')
+        content = get_response_content(response)
+
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        self.assertTrue('name' in content)
+        self.assertEqual(content['name'], 'Cole Polyak')
+
+        db_member = Member.objects.filter(email=member.email)[0]
+        self.assertEqual(db_member.name, 'Cole Polyak')
+        self.assertFalse('hello' in content)
+
+        # Regular PATCH, with multiple fields.
+        data = {'name': 'Cole Polyak', 'first_name': 'Cole', 'last_name': 'Polyak'}
+        response = client.patch(url, data=data, format='json')
+        content = get_response_content(response)
+
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        self.assertTrue('name' in content)
+        self.assertEqual(content['name'], 'Cole Polyak')
+        self.assertTrue('first_name' in content)
+        self.assertEqual(content['first_name'], 'Cole')
+        self.assertTrue('last_name' in content)
+        self.assertEqual(content['last_name'], 'Polyak')
+
+        db_member = Member.objects.filter(email=member.email)[0]
+        self.assertEqual(db_member.name, 'Cole Polyak')
+        self.assertEqual(db_member.first_name, 'Cole')
+        self.assertEqual(db_member.last_name, 'Polyak')
+
     # Helper method for improper email formats.
     def bogus_email_test(self, client, data, email):
         data['email'] = email

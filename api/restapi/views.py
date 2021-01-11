@@ -23,6 +23,8 @@ from .data_utilities import apply_search_filters, apply_ordering
 class MemberViewSet(ViewSet, CustomPaginationMixin):
     pagination_class = api_settings.DEFAULT_PAGINATION_CLASS
 
+    calculated_fields = ['member_score', 'present']
+
     # TODO: I think there's room for optimization and code cleanup here.
     def list(self, request):
         """
@@ -113,16 +115,33 @@ class MemberViewSet(ViewSet, CustomPaginationMixin):
     # def update(self, request, pk=None):
     #     pass
 
-    # def partial_update(self, request, pk=None):
-    #     pass
-
-    def destroy(self, request, pk=None):
-        if not request.user.is_staff:
+    def partial_update(self, request, pk=None):
+        if 'email' in request.data:
             return Response(
-                {'delete': 'This operation is forbidden for your level of access.'},
-                status=status.HTTP_403_FORBIDDEN
+                {'email': 'Email is a field that must be modified by an administrator manually.'},
+                status=status.HTTP_400_BAD_REQUEST
             )
 
+        errors = {}
+        for field in self.calculated_fields:
+            if field in request.data:
+                errors[field] = str(field) + " is a calculated field and cannot be updated via PATCH."
+
+        if errors:
+            return Response(
+                errors,
+                status=status.HTTP_400_BAD_REQUEST
+            )
+
+        target_object = Member.objects.get(pk=pk)
+        serializer = MemberSerializerAdmin(target_object, data=request.data, partial=True)
+
+        if serializer.is_valid():
+            serializer.save()
+            return Response(serializer.data, status=status.HTTP_200_OK)
+        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
+    def destroy(self, request, pk=None):
         if pk is None:
             return Response(
                 {'primary_key': 'The request given does not have an included primary key.'},
