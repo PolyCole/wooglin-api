@@ -76,7 +76,6 @@ class MemberViewSet(ViewSet, CustomPaginationMixin):
             serializer = MemberSerializerNonAdmin(data, many=True)
             return serializer.data
 
-
     def create(self, request):
         """
         Creates Members and an attached User based on a request.
@@ -117,9 +116,33 @@ class MemberViewSet(ViewSet, CustomPaginationMixin):
     # def partial_update(self, request, pk=None):
     #     pass
 
-    # def destroy(self, request, pk=None):
-    #     pass
+    def destroy(self, request, pk=None):
+        if not request.user.is_staff:
+            return Response(
+                {'delete': 'This operation is forbidden for your level of access.'},
+                status=status.HTTP_403_FORBIDDEN
+            )
 
+        if pk is None:
+            return Response(
+                {'primary_key': 'The request given does not have an included primary key.'},
+                status=status.HTTP_400_BAD_REQUEST
+            )
+
+        queryset = Member.objects.all().filter(id=pk)
+
+        if queryset:
+            Member.objects.filter(id=pk).delete()
+            return Response(
+                {'delete': 'The delete operation has completed successfully. If this has been done in error, '
+                           'contact your Administrator.'},
+                status=status.HTTP_204_NO_CONTENT
+            )
+        else:
+            return Response(
+                {'primary_key': 'The specified primary key does not exist.'},
+                status=status.HTTP_404_NOT_FOUND
+            )
 
     def get_permissions(self):
         """
