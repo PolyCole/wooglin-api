@@ -112,10 +112,24 @@ class MemberViewSet(ViewSet, CustomPaginationMixin):
 
         return Response(serializer.data)
 
-    # def update(self, request, pk=None):
-    #     pass
+    def update(self, request, pk=None):
+        """
+        Handles PUT requests. Essentially, maps to either create or partial_update depending on the request.
+        """
+
+        # If the pk doesn't exist, it should be created.
+        if Member.objects.filter(id=pk).count() == 0:
+            return self.create(request)
+
+        # If the pk exists, the data in it should be updated.
+        # However, there currently aren't any use cases in which we would want to allow the user to 
+        # update the entirety of a Member record. Especially if PATCH supports multi-field updates already.
+        return self.partial_update(request, pk)
 
     def partial_update(self, request, pk=None):
+        """
+        Updates one or more but not all of the fields from a request.
+        """
         if 'email' in request.data:
             return Response(
                 {'email': 'Email is a field that must be modified by an administrator manually.'},
@@ -142,6 +156,10 @@ class MemberViewSet(ViewSet, CustomPaginationMixin):
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
     def destroy(self, request, pk=None):
+        """
+        Deletes a Member and its attached User from the Database.
+        """
+
         if pk is None:
             return Response(
                 {'primary_key': 'The request given does not have an included primary key.'},
@@ -151,6 +169,8 @@ class MemberViewSet(ViewSet, CustomPaginationMixin):
         queryset = Member.objects.all().filter(id=pk)
 
         if queryset:
+            # Presumably we could just delete the attached User account and see the cascade behavior, but for now
+            # this will do.
             Member.objects.filter(id=pk).delete()
             members = list(queryset)
             User.objects.filter(email=members[0].email).delete()
