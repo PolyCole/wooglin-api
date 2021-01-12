@@ -530,7 +530,7 @@ class ApiTests(APITestCase):
         self.assertEqual(Member.objects.count(), members_before - 1)
         self.assertEqual(User.objects.count(), users_before - 1)
 
-    # Trying to update a model without the proper perms.
+    # Trying to update a Member model without the proper perms.
     def test_partial_update_forbidden(self):
         member = generate_fake_new_user(False)
         token = get_tokens(member.name, "fake_password")['access']
@@ -551,7 +551,7 @@ class ApiTests(APITestCase):
         self.assertTrue('detail' in content)
         self.assertEqual(content['detail'], 'You do not have permission to perform this action.')
 
-    # Trying to update a model without the proper perms.
+    # Trying to update a Member model with the proper perms.
     def test_partial_update(self):
         member = generate_fake_new_user(True)
         token = get_tokens(member.name, "fake_password")['access']
@@ -602,6 +602,106 @@ class ApiTests(APITestCase):
         self.assertEqual(db_member.name, 'Cole Polyak')
         self.assertEqual(db_member.first_name, 'Cole')
         self.assertEqual(db_member.last_name, 'Polyak')
+
+    # Trying to PUT a Member model without the proper perms.
+    def test_put_update_forbidden(self):
+        member = generate_fake_new_user(False)
+        token = get_tokens(member.name, "fake_password")['access']
+
+        client = APIClient()
+        client.credentials(HTTP_AUTHORIZATION='Bearer ' + str(token))
+
+        # Trying with an existing id.
+        url = '/api/v1/member/' + str(member.id) + "/"
+        data = {'name': 'Cole Polyak'}
+        response = client.put(url, data=data, format='json')
+        content = get_response_content(response)
+
+        self.assertEqual(response.status_code, status.HTTP_403_FORBIDDEN)
+
+        db_member = Member.objects.filter(email=member.email)[0]
+        self.assertEqual(db_member.name, member.name)
+        self.assertTrue('detail' in content)
+        self.assertEqual(content['detail'], 'You do not have permission to perform this action.')
+
+        # Trying with a non-existent id.
+        url = '/api/v1/member/45/'
+        data = {'name': 'Cole Polyak'}
+        response = client.put(url, data=data, format='json')
+        content = get_response_content(response)
+
+        self.assertEqual(response.status_code, status.HTTP_403_FORBIDDEN)
+
+        db_member = Member.objects.filter(email=member.email)[0]
+        self.assertEqual(db_member.name, member.name)
+        self.assertTrue('detail' in content)
+        self.assertEqual(content['detail'], 'You do not have permission to perform this action.')
+
+    # Trying to PUT a Member model with the proper perms.
+    def test_put_update(self):
+        member = generate_fake_new_user(True)
+        token = get_tokens(member.name, "fake_password")['access']
+
+        client = APIClient()
+        client.credentials(HTTP_AUTHORIZATION='Bearer ' + str(token))
+
+        # Trying with an existing id.
+        url = '/api/v1/member/' + str(member.id) + "/"
+        data = {'name': 'Cole Polyak'}
+        response = client.put(url, data=data, format='json')
+        content = get_response_content(response)
+
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        updated_member = Member.objects.filter(id=member.id)
+        self.assertEqual(updated_member[0].name, 'Cole Polyak')
+
+        # Trying to update email address.
+        url = '/api/v1/member/' + str(member.id) + "/"
+        data = {'email': 'colepolyak@gmail.com'}
+        response = client.put(url, data=data, format='json')
+        content = get_response_content(response)
+
+        self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
+        self.assertTrue('email' in content)
+        self.assertEqual(content['email'], 'Email is a field that must be modified by an administrator manually.')
+        updated_member = Member.objects.filter(id=member.id)
+        self.assertEqual(member.email, updated_member[0].email)
+
+        # Trying to update on a non-existent id, with improper information.
+        url = '/api/v1/member/123/'
+        data = {
+            'email': 'cole@gmail.com',
+            'first_name': 'Peter',
+            'last_name': 'Parker',
+            'name': 'Peter Parker',
+            'legal_name': 'Petathan Parker',
+            'address': 'Stark Tower, Room 1',
+            'phone': '000.000.0000',
+            'rollnumber': 123456,
+            'inactive_flag': False,
+            'abroad_flag': True,
+        }
+        response = client.put(url, data=data, format='json')
+        content = get_response_content(response)
+
+        self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
+        self.assertTrue('position' in content)
+        self.assertEqual(content['position'][0], 'This field is required.')
+        self.assertEqual(Member.objects.count(), 2)
+        self.assertEqual(User.objects.count(), 2)
+
+        # Trying to update a non-existent id with proper data.
+        url = '/api/v1/member/123/'
+        data['position'] = 'Test Member'
+        response = client.put(url, data=data, format='json')
+        content = get_response_content(response)
+
+        self.assertEqual(response.status_code, status.HTTP_201_CREATED)
+        self.assertTrue('name' in content)
+        self.assertEqual(content['name'], 'Peter Parker')
+        self.assertEqual(Member.objects.count(), 3)
+        self.assertEqual(User.objects.count(), 3)
+
 
     # Helper method for improper email formats.
     def bogus_email_test(self, client, data, email):
