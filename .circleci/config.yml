@@ -5,7 +5,11 @@ orbs:
 
 jobs:
   build-and-test:
-    executor: python/default
+    docker:
+      - image: circleci/python:3.8.2  # primary container for the build job
+        auth:
+          username: polycole
+          password: $DOCKERHUB_PASSWORD  # context / project UI env-var reference
     steps:
       - checkout
       - python/load-cache
