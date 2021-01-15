@@ -2,6 +2,8 @@
   <img src="https://i.imgur.com/ssAWf0r.jpg" width="800"></img>
 </p>
 
+![CircleCI](https://img.shields.io/circleci/build/github/WooglinAlphaZeta/wooglin-api/main?style=for-the-badge)
+
 ***
 
 ### The REST API Powering the Wooglin Slackbot.
