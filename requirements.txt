@@ -97,6 +97,7 @@ urllib3==1.25.11
 wcwidth==0.1.9
 websocket-client==0.57.0
 Werkzeug==1.0.1
+whitenoise==5.2.0
 wrapt==1.12.1
 yarl==1.5.1
 yolk3k==0.9

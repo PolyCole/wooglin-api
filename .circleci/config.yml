@@ -2,6 +2,7 @@ version: 2.1
 
 orbs:
   python: circleci/python@0.2.1
+  slack: circleci/slack@4.1
 
 jobs:
   build-and-test:
@@ -26,6 +27,42 @@ jobs:
       - run:
           command: ./manage.py test
           name: Test
+      - slack/notify:
+          channel: $SLACK_DEFAULT_CHANNEL
+          custom: |
+            {
+              "blocks": [
+                {
+                  "type": "section",
+                  "fields": [
+                    {
+                      "type": "plain_text",
+                      "text": "CircleCI Build success.",
+                      "emoji": true
+                    }
+                  ]
+                }
+              ]
+            }
+          event: pass
+      - slack/notify:
+          channel: $SLACK_DEFAULT_CHANNEL
+          custom: |
+            {
+              "blocks": [
+                {
+                  "type": "section",
+                  "fields": [
+                    {
+                      "type": "plain_text",
+                      "text": "CircleCI Build failure.",
+                      "emoji": true
+                    }
+                  ]
+                }
+              ]
+            }
+          event: fail
 
 workflows:
   main:

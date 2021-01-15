@@ -45,7 +45,7 @@ if secrets is None:
 else:
     DEBUG = secrets['DEBUG_VALUE']
 
-ALLOWED_HOSTS = ['wooglin-api.herokuapp.com', '0.0.0.0']
+ALLOWED_HOSTS = ['wooglin-api.herokuapp.com', '0.0.0.0', '127.0.0.1']
 
 
 # Application definition
@@ -70,7 +70,9 @@ MIDDLEWARE = [
     'django.contrib.auth.middleware.AuthenticationMiddleware',
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
+    'whitenoise.middleware.WhiteNoiseMiddleware',
 ]
+
 
 ROOT_URLCONF = 'api.urls'
 
@@ -141,16 +143,52 @@ AUTH_PASSWORD_VALIDATORS = [
 ]
 
 # Uncomment to DISABLE browsable API (in production)
-REST_FRAMEWORK = {
-    # 'DEFAULT_RENDERER_CLASSES': (
-    #     'rest_framework.renderers.JSONRenderer',
-    # )
-    'DEFAULT_PAGINATION_CLASS': 'rest_framework.pagination.PageNumberPagination',
-    'PAGE_SIZE': 25,
-    'DEFAULT_AUTHENTICATION_CLASSES': (
-        'rest_framework_simplejwt.authentication.JWTAuthentication',
-    )
-}
+if secrets is None:
+    if os.environ['DEBUG_VALUE']:
+        REST_FRAMEWORK = {
+            # 'DEFAULT_RENDERER_CLASSES': (
+            #     'rest_framework.renderers.JSONRenderer',
+            # )
+            'DEFAULT_PAGINATION_CLASS': 'rest_framework.pagination.PageNumberPagination',
+            'PAGE_SIZE': 25,
+            'DEFAULT_AUTHENTICATION_CLASSES': (
+                'rest_framework_simplejwt.authentication.JWTAuthentication',
+            )
+        }
+    else:
+        REST_FRAMEWORK = {
+            'DEFAULT_RENDERER_CLASSES': (
+                'rest_framework.renderers.JSONRenderer',
+            ),
+            'DEFAULT_PAGINATION_CLASS': 'rest_framework.pagination.PageNumberPagination',
+            'PAGE_SIZE': 25,
+            'DEFAULT_AUTHENTICATION_CLASSES': (
+                'rest_framework_simplejwt.authentication.JWTAuthentication',
+            )
+        }
+else:
+    if secrets['DEBUG_VALUE']:
+        REST_FRAMEWORK = {
+            # 'DEFAULT_RENDERER_CLASSES': (
+            #     'rest_framework.renderers.JSONRenderer',
+            # ),
+            'DEFAULT_PAGINATION_CLASS': 'rest_framework.pagination.PageNumberPagination',
+            'PAGE_SIZE': 25,
+            'DEFAULT_AUTHENTICATION_CLASSES': (
+                'rest_framework_simplejwt.authentication.JWTAuthentication',
+            )
+        }
+    else:
+        REST_FRAMEWORK = {
+            'DEFAULT_RENDERER_CLASSES': (
+                'rest_framework.renderers.JSONRenderer',
+            ),
+            'DEFAULT_PAGINATION_CLASS': 'rest_framework.pagination.PageNumberPagination',
+            'PAGE_SIZE': 25,
+            'DEFAULT_AUTHENTICATION_CLASSES': (
+                'rest_framework_simplejwt.authentication.JWTAuthentication',
+            )
+        }
 
 SIMPLE_JWT = {
     'ACCESS_TOKEN_LIFETIME': timedelta(minutes=120),
@@ -198,4 +236,8 @@ USE_TZ = True
 # Static files (CSS, JavaScript, Images)
 # https://docs.djangoproject.com/en/3.1/howto/static-files/
 
+STATIC_ROOT = os.path.join(BASE_DIR, 'staticfiles')
 STATIC_URL = '/static/'
+STATICFILES_DIRS = (
+    os.path.join(BASE_DIR, 'static'),
+)
