@@ -40,13 +40,12 @@ else:
 
 
 # SECURITY WARNING: don't run with debug turned on in production!
-# if secrets is None:
-#     DEBUG = False
-# else:
-#     DEBUG = True
-DEBUG = True
+if secrets is None:
+    DEBUG = os.environ['DEBUG_VALUE']
+else:
+    DEBUG = secrets['DEBUG_VALUE']
 
-ALLOWED_HOSTS = []
+ALLOWED_HOSTS = ['wooglin-api.herokuapp.com', '0.0.0.0']
 
 
 # Application definition
