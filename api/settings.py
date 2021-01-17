@@ -111,9 +111,9 @@ if secrets is None:
     #         'PORT': os.environ['DB_PORT'],
     #     }
     # }
-    DATABASES = {
-        'default' : dj_database_url.config(conn_max_age=600, ssl_require=True)
-    }
+
+    DATABASES = {}
+    DATABASES['default'] = dj_database_url.config(conn_max_age=600, ssl_require=True)
 else:
     DATABASES = {
         'default': {
