@@ -45,23 +45,23 @@ jobs:
                         "fields": [
                             {
                                 "type": "mrkdwn",
-                                "text": "*Project*:\\n$CIRCLE_PROJECT_REPONAME"
+                                "text": "*Project*:\n$CIRCLE_PROJECT_REPONAME"
                             },
                             {
                                 "type": "mrkdwn",
-                                "text": "*When*:\\n$(date +'%m/%d/%Y %T')"
+                                "text": "*When*:\n$(date +'%m/%d/%Y %T')"
                             },
                             {
                                 "type": "mrkdwn",
-                                "text": "*Tag*:\\n$CIRCLE_TAG"
+                                "text": "*Tag*:\n$CIRCLE_TAG"
                             },
                             {
                                 "type": "mrkdwn",
-                                "text": "*Branch*:\\n$CIRCLE_BRANCH"
+                                "text": "*Branch*:\n$CIRCLE_BRANCH"
                             },
                             {
                                 "type": "mrkdwn",
-                                "text": "*Author*:\\n$CIRCLE_USERNAME"
+                                "text": "*Author*:\n$CIRCLE_USERNAME"
                             }
                         ],
                         "accessory": {
@@ -113,19 +113,19 @@ jobs:
                   "fields": [
                     {
                       "type": "mrkdwn",
-                      "text": "*Project*:\\n$CIRCLE_PROJECT_REPONAME"
+                      "text": "*Project*:\n$CIRCLE_PROJECT_REPONAME"
                     },
                     {
                       "type": "mrkdwn",
-                      "text": "*When*:\\n$(date +'%m/%d/%Y %T')"
+                      "text": "*When*:\n$(date +'%m/%d/%Y %T')"
                     },
                     {
                       "type": "mrkdwn",
-                      "text": "*Branch*:\\n$CIRCLE_BRANCH"
+                      "text": "*Branch*:\n$CIRCLE_BRANCH"
                     },
                     {
                       "type": "mrkdwn",
-                      "text": "*Author*:\\n$CIRCLE_USERNAME"
+                      "text": "*Author*:\n$CIRCLE_USERNAME"
                     }
                   ],
                   "accessory": {
@@ -139,7 +139,7 @@ jobs:
                   "fields": [
                     {
                       "type": "mrkdwn",
-                      "text": "*Mentions*:\\n$SLACK_PARAM_MENTIONS"
+                      "text": "*Mentions*:\n$SLACK_PARAM_MENTIONS"
                     }
                   ]
                 },
