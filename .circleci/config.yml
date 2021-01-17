@@ -29,12 +29,136 @@ jobs:
           name: Test
       - slack/notify:
           channel: $SLACK_DEFAULT_CHANNEL
+          custom: |
+          {
+              "blocks": [
+                  {
+                      "type": "header",
+                      "text": {
+                          "type": "plain_text",
+                          "text": ":tada: Deployment Successful! :tada:",
+                          "emoji": true
+                      }
+                  },
+                  {
+                      "type": "section",
+                      "fields": [
+                          {
+                              "type": "mrkdwn",
+                              "text": "*Project*:\\n$CIRCLE_PROJECT_REPONAME"
+                          },
+                          {
+                              "type": "mrkdwn",
+                              "text": "*When*:\\n$(date +'%m/%d/%Y %T')"
+                          },
+                          {
+                              "type": "mrkdwn",
+                              "text": "*Tag*:\\n$CIRCLE_TAG"
+                          },
+                          {
+                              "type": "mrkdwn",
+                              "text": "*Branch*:\\n$CIRCLE_BRANCH"
+                          },
+                          {
+                              "type": "mrkdwn",
+                              "text": "*Author*:\\n$CIRCLE_USERNAME"
+                          }
+                      ],
+                      "accessory": {
+                          "type": "image",
+                          "image_url": "https://i.imgur.com/olHpRLd.jpg",
+                          "alt_text": "Wooglin CI Success Logo"
+                      }
+                  },
+                  {
+                      "type": "actions",
+                      "elements": [
+                          {
+                              "type": "button",
+                              "text": {
+                                  "type": "plain_text",
+                                  "text": "View Job"
+                              },
+                              "url": "${CIRCLE_BUILD_URL}"
+                          }
+                      ]
+                  }
+              ]
+          }
           event: pass
-          template: success_tagged_deploy_1
       - slack/notify:
           channel: $SLACK_DEFAULT_CHANNEL
+          custom: |
+          {
+            "blocks": [
+              {
+                "type": "header",
+                "text": {
+                  "type": "plain_text",
+                  "text": ":red_circle: Job Failed. :red_circle:",
+                  "emoji": true
+                }
+              },
+              {
+                "type": "section",
+                "fields": [
+                  {
+                    "type": "mrkdwn",
+                    "text": "*Job*: ${CIRCLE_JOB}"
+                  }
+                ]
+              },
+              {
+                "type": "section",
+                "fields": [
+                  {
+                    "type": "mrkdwn",
+                    "text": "*Project*:\\n$CIRCLE_PROJECT_REPONAME"
+                  },
+                  {
+                    "type": "mrkdwn",
+                    "text": "*When*:\\n$(date +'%m/%d/%Y %T')"
+                  },
+                  {
+                    "type": "mrkdwn",
+                    "text": "*Branch*:\\n$CIRCLE_BRANCH"
+                  },
+                  {
+                    "type": "mrkdwn",
+                    "text": "*Author*:\\n$CIRCLE_USERNAME"
+                  }
+                ],
+                "accessory": {
+                  "type": "image",
+                  "image_url": "https://i.imgur.com/CXDfXUB.jpg",
+                  "alt_text": "Wooglin CI Failure Logo"
+                }
+              },
+              {
+                "type": "section",
+                "fields": [
+                  {
+                    "type": "mrkdwn",
+                    "text": "*Mentions*:\\n$SLACK_PARAM_MENTIONS"
+                  }
+                ]
+              },
+              {
+                "type": "actions",
+                "elements": [
+                  {
+                    "type": "button",
+                    "text": {
+                      "type": "plain_text",
+                      "text": "View Job"
+                    },
+                    "url": "https://google.com"
+                  }
+                ]
+              }
+            ]
+          }
           event: fail
-          template: basic_fail_1
 
 workflows:
   main:
