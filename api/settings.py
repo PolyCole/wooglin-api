@@ -101,19 +101,21 @@ WSGI_APPLICATION = 'api.wsgi.application'
 # https://docs.djangoproject.com/en/3.1/ref/settings/#databases
 
 if secrets is None:
-    # DATABASES = {
-    #     'default': {
-    #         'ENGINE': 'django.db.backends.postgresql_psycopg2',
-    #         'NAME': os.environ['DB_NAME'],
-    #         'USER': os.environ['DB_USER'],
-    #         'PASSWORD': os.environ['DB_PASSWORD'],
-    #         'HOST': os.environ['DB_HOST'],
-    #         'PORT': os.environ['DB_PORT'],
-    #     }
-    # }
-
-    DATABASES = {}
-    DATABASES['default'] = dj_database_url.config(conn_max_age=600, ssl_require=True)
+    try:
+        DATABASES = {}
+        DATABASES['default'] = dj_database_url.config(conn_max_age=600, ssl_require=True)
+    except Exception as e:
+        print(e)
+        DATABASES = {
+            'default': {
+                'ENGINE': 'django.db.backends.postgresql_psycopg2',
+                'NAME': os.environ['DB_NAME'],
+                'USER': os.environ['DB_USER'],
+                'PASSWORD': os.environ['DB_PASSWORD'],
+                'HOST': os.environ['DB_HOST'],
+                'PORT': os.environ['DB_PORT'],
+            }
+        }
 else:
     DATABASES = {
         'default': {
