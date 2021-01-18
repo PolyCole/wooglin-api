@@ -48,6 +48,9 @@ else:
     DEBUG = secrets['DEBUG_VALUE']
 
 # Ensuring we run the api in the right place.
+print("Current Debug value: " + DEBUG)
+print("Is DEBUG Boolean True?: " + str(DEBUG is True))
+
 if DEBUG:
     ALLOWED_HOSTS = ['0.0.0.0', '127.0.0.1']
 else:
