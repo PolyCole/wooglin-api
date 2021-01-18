@@ -55,6 +55,8 @@ if DEBUG:
     ALLOWED_HOSTS = ['0.0.0.0', '127.0.0.1']
 else:
     ALLOWED_HOSTS = ['wooglin-api.herokuapp.com']
+    
+print("ALLOWED HOSTS:" + str(ALLOWED_HOSTS))
 
 # Application definition
 
