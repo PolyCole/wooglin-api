@@ -47,8 +47,11 @@ if secrets is None:
 else:
     DEBUG = secrets['DEBUG_VALUE']
 
-ALLOWED_HOSTS = ['wooglin-api.herokuapp.com', '0.0.0.0', '127.0.0.1']
-
+# Ensuring we run the api in the right place.
+if DEBUG:
+    ALLOWED_HOSTS = ['0.0.0.0', '127.0.0.1']
+else:
+    ALLOWED_HOSTS = ['wooglin-api.herokuapp.com']
 
 # Application definition
 
