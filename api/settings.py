@@ -72,7 +72,6 @@ MIDDLEWARE = [
     'django.contrib.auth.middleware.AuthenticationMiddleware',
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
-    'whitenoise.middleware.WhiteNoiseMiddleware',
 ]
 
 
@@ -100,20 +99,25 @@ WSGI_APPLICATION = 'api.wsgi.application'
 # Database
 # https://docs.djangoproject.com/en/3.1/ref/settings/#databases
 
+# TODO : Clean this up. It's slightly hacky.
 if secrets is None:
-    # DATABASES = {
-    #     'default': {
-    #         'ENGINE': 'django.db.backends.postgresql_psycopg2',
-    #         'NAME': os.environ['DB_NAME'],
-    #         'USER': os.environ['DB_USER'],
-    #         'PASSWORD': os.environ['DB_PASSWORD'],
-    #         'HOST': os.environ['DB_HOST'],
-    #         'PORT': os.environ['DB_PORT'],
-    #     }
-    # }
+    try:
+        location = os.environ['LOCATION']
 
-    DATABASES = {}
-    DATABASES['default'] = dj_database_url.config(conn_max_age=600, ssl_require=True)
+        DATABASES = {
+            'default': {
+                'ENGINE': 'django.db.backends.postgresql_psycopg2',
+                'NAME': os.environ['DB_NAME'],
+                'USER': os.environ['DB_USER'],
+                'PASSWORD': os.environ['DB_PASSWORD'],
+                'HOST': os.environ['DB_HOST'],
+                'PORT': os.environ['DB_PORT'],
+            }
+        }
+
+    except KeyError:
+        DATABASES = {}
+        DATABASES['default'] = dj_database_url.config(conn_max_age=600, ssl_require=True)
 else:
     DATABASES = {
         'default': {
