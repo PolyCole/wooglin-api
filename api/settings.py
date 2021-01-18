@@ -43,18 +43,20 @@ else:
 
 # SECURITY WARNING: don't run with debug turned on in production!
 if secrets is None:
-    DEBUG = bool(os.environ['DEBUG_VALUE'])
+    DEBUG = os.environ['DEBUG_VALUE']
 else:
-    DEBUG = bool(secrets['DEBUG_VALUE'])
+    DEBUG = secrets['DEBUG_VALUE']
 
 # Ensuring we run the api in the right place.
 print("Current Debug value: " + DEBUG)
 print("Is DEBUG Boolean True?: " + str(DEBUG is True))
 
-if DEBUG:
+if DEBUG == "True":
     ALLOWED_HOSTS = ['0.0.0.0', '127.0.0.1']
-else:
+elif DEBUG == "False":
     ALLOWED_HOSTS = ['wooglin-api.herokuapp.com']
+else:
+    raise Exception("DEBUG VALUE IS NOT A PROPER BOOLEAN")
     
 print("ALLOWED HOSTS:" + str(ALLOWED_HOSTS))
 
