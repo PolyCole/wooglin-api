@@ -43,9 +43,9 @@ else:
 
 # SECURITY WARNING: don't run with debug turned on in production!
 if secrets is None:
-    DEBUG = os.environ['DEBUG_VALUE']
+    DEBUG = bool(os.environ['DEBUG_VALUE'])
 else:
-    DEBUG = secrets['DEBUG_VALUE']
+    DEBUG = bool(secrets['DEBUG_VALUE'])
 
 # Ensuring we run the api in the right place.
 print("Current Debug value: " + DEBUG)
