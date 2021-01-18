@@ -45,7 +45,7 @@ else:
 if secrets is None:
     DEBUG = os.environ['DEBUG_VALUE'] == 'True'
 else:
-    DEBUG = secrets['DEBUG_VALUE'] == 'True
+    DEBUG = secrets['DEBUG_VALUE'] == 'True'
 
 # Ensuring we run the api in the right place.
 if DEBUG == "True":
