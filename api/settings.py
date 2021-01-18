@@ -43,14 +43,11 @@ else:
 
 # SECURITY WARNING: don't run with debug turned on in production!
 if secrets is None:
-    DEBUG = os.environ['DEBUG_VALUE']
+    DEBUG = os.environ['DEBUG_VALUE'] == 'True'
 else:
-    DEBUG = secrets['DEBUG_VALUE']
+    DEBUG = secrets['DEBUG_VALUE'] == 'True
 
 # Ensuring we run the api in the right place.
-print("Current Debug value: " + DEBUG)
-print("Is DEBUG Boolean True?: " + str(DEBUG is True))
-
 if DEBUG == "True":
     ALLOWED_HOSTS = ['0.0.0.0', '127.0.0.1']
 elif DEBUG == "False":
@@ -58,8 +55,6 @@ elif DEBUG == "False":
 else:
     raise Exception("DEBUG VALUE IS NOT A PROPER BOOLEAN")
     
-print("ALLOWED HOSTS:" + str(ALLOWED_HOSTS))
-
 # Application definition
 
 INSTALLED_APPS = [
