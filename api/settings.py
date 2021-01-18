@@ -48,12 +48,10 @@ else:
     DEBUG = secrets['DEBUG_VALUE'] == 'True'
 
 # Ensuring we run the api in the right place.
-if DEBUG == "True":
+if DEBUG:
     ALLOWED_HOSTS = ['0.0.0.0', '127.0.0.1']
-elif DEBUG == "False":
-    ALLOWED_HOSTS = ['wooglin-api.herokuapp.com']
 else:
-    raise Exception("DEBUG VALUE IS NOT A PROPER BOOLEAN")
+    ALLOWED_HOSTS = ['wooglin-api.herokuapp.com']
     
 # Application definition
 
