@@ -4,8 +4,7 @@
 secrets.json
 
 # Static files.
-static/
-staticfiles/
+staticfiles/*
 
 
 ### Django ###
