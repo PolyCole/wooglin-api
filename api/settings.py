@@ -51,7 +51,7 @@ else:
 if DEBUG:
     ALLOWED_HOSTS = ['0.0.0.0', '127.0.0.1']
 else:
-    ALLOWED_HOSTS = ['wooglin-api.herokuapp.com']
+    ALLOWED_HOSTS = ['127.0.0.1']
     
 # Application definition
 
@@ -67,8 +67,11 @@ INSTALLED_APPS = [
     'drf_yasg',
 ]
 
+# Middleware is added in the order it appears in this list
+# DO NOT PUT ANYTHING ABOVE SecurityMiddleware
 MIDDLEWARE = [
     'django.middleware.security.SecurityMiddleware',
+    'whitenoise.middleware.WhiteNoiseMiddleware',
     'django.contrib.sessions.middleware.SessionMiddleware',
     'django.middleware.common.CommonMiddleware',
     'django.middleware.csrf.CsrfViewMiddleware',
@@ -165,7 +168,7 @@ if secrets is None:
             'PAGE_SIZE': 25,
             'DEFAULT_AUTHENTICATION_CLASSES': (
                 'rest_framework_simplejwt.authentication.JWTAuthentication',
-            )
+            ),
         }
     else:
         REST_FRAMEWORK = {
@@ -176,7 +179,7 @@ if secrets is None:
             'PAGE_SIZE': 25,
             'DEFAULT_AUTHENTICATION_CLASSES': (
                 'rest_framework_simplejwt.authentication.JWTAuthentication',
-            )
+            ),
         }
 else:
     if secrets['DEBUG_VALUE']:
@@ -188,7 +191,7 @@ else:
             'PAGE_SIZE': 25,
             'DEFAULT_AUTHENTICATION_CLASSES': (
                 'rest_framework_simplejwt.authentication.JWTAuthentication',
-            )
+            ),
         }
     else:
         REST_FRAMEWORK = {
@@ -199,7 +202,7 @@ else:
             'PAGE_SIZE': 25,
             'DEFAULT_AUTHENTICATION_CLASSES': (
                 'rest_framework_simplejwt.authentication.JWTAuthentication',
-            )
+            ),
         }
 
 SIMPLE_JWT = {
@@ -248,8 +251,11 @@ USE_TZ = True
 # Static files (CSS, JavaScript, Images)
 # https://docs.djangoproject.com/en/3.1/howto/static-files/
 
+# STATIC_ROOT = os.path.join(BASE_DIR, 'staticfiles')
+STATIC_URL = '/staticfiles/'
 STATIC_ROOT = os.path.join(BASE_DIR, 'staticfiles')
-STATIC_URL = '/static/'
-STATICFILES_DIRS = (
+STATICFILES_STORAGE = 'whitenoise.storage.CompressedStaticFilesStorage'
+
+STATICFILES_DIRS = [
     os.path.join(BASE_DIR, 'static'),
-)
+]

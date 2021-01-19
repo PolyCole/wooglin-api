@@ -25,7 +25,7 @@ class Member(models.Model):
     present = models.IntegerField()
 
     position = models.CharField(max_length=255)
-    # avatar = models.ImageField(upload_to='static/UserMedia/', default='/static/images/default.jpg')
+    # avatar = models.ImageField(upload_to='staticfiles/UserMedia/', default='/staticfiles/images/default.jpg')
 
     def __str__(self):
         return self.name

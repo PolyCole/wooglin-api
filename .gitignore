@@ -3,6 +3,10 @@
 # Project-Specific
 secrets.json
 
+# Static files.
+static/
+staticfiles/
+
 
 ### Django ###
 *.log
