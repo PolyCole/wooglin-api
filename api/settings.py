@@ -51,7 +51,7 @@ else:
 if DEBUG:
     ALLOWED_HOSTS = ['0.0.0.0', '127.0.0.1']
 else:
-    ALLOWED_HOSTS = ['127.0.0.1']
+    ALLOWED_HOSTS = ['wooglin-api.herokuapp.com']
     
 # Application definition
 
