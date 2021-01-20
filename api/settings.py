@@ -259,3 +259,7 @@ STATICFILES_STORAGE = 'whitenoise.storage.CompressedStaticFilesStorage'
 STATICFILES_DIRS = [
     os.path.join(BASE_DIR, 'static'),
 ]
+
+# Timezone stuff.
+USE_TZ = True
+TIME_ZONE = 'America/Denver'
