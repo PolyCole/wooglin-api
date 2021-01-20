@@ -1,6 +1,5 @@
-from attr.filters import exclude
 from rest_framework import serializers
-from .models.members import Member
+from restapi.models.members import Member
 from django.contrib.auth.models import User
 import re
 

@@ -43,16 +43,16 @@ else:
 
 # SECURITY WARNING: don't run with debug turned on in production!
 if secrets is None:
-    DEBUG = os.environ['DEBUG_VALUE'] == 'True'
+    DEBUG = os.environ['DEBUG_VALUE'] == True
 else:
-    DEBUG = secrets['DEBUG_VALUE'] == 'True'
+    DEBUG = secrets['DEBUG_VALUE'] == True
 
 # Ensuring we run the api in the right place.
 if DEBUG:
-    ALLOWED_HOSTS = ['0.0.0.0', '127.0.0.1']
+    ALLOWED_HOSTS = ['127.0.0.1']
 else:
     ALLOWED_HOSTS = ['wooglin-api.herokuapp.com']
-    
+
 # Application definition
 
 INSTALLED_APPS = [
@@ -259,3 +259,7 @@ STATICFILES_STORAGE = 'whitenoise.storage.CompressedStaticFilesStorage'
 STATICFILES_DIRS = [
     os.path.join(BASE_DIR, 'static'),
 ]
+
+# Timezone stuff.
+USE_TZ = True
+TIME_ZONE = 'America/Denver'
