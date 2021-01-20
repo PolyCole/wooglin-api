@@ -1,3 +1,0 @@
-One of the rules in Git is you can't commit empty directories, but in order for the Heroku deployment to work,
-this directory needs to exist because it's where Heroku puts staticfiles during the collectstatic operation.
-This little file ensures that directory exists once we get down the pipline.
