@@ -43,7 +43,7 @@ else:
 
 # SECURITY WARNING: don't run with debug turned on in production!
 if secrets is None:
-    DEBUG = os.environ['DEBUG_VALUE'] == 'True'
+    DEBUG = os.environ['DEBUG_VALUE'] == True
 else:
     DEBUG = secrets['DEBUG_VALUE'] == True
 
