@@ -12,12 +12,12 @@ from rest_framework.settings import api_settings
 from restapi.models.members import Member
 from django.contrib.auth.models import User
 
-from .serializers import MemberSerializerAdmin
-from .serializers import MemberSerializerNonAdmin
+from restapi.serializers import MemberSerializerAdmin
+from restapi.serializers import MemberSerializerNonAdmin
 
 from restapi.mixins import CustomPaginationMixin
 
-from .data_utilities import apply_search_filters, apply_ordering
+from restapi.data_utilities import apply_search_filters, apply_ordering
 
 
 class MemberViewSet(ViewSet, CustomPaginationMixin):
