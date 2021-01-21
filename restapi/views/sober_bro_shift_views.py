@@ -29,8 +29,6 @@ class SoberBroShiftViewSet(ViewSet, CustomPaginationMixin):
 
         data = SoberBroShift.objects.get(date__range=(today_min, today_max)).order_by('date')
 
-        serializer =
-
 
     # def create(self, request):
     #     pass
