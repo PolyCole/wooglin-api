@@ -7,7 +7,8 @@ from restapi import views
 
 router = routers.DefaultRouter()
 router.register(r'member', views.MemberViewSet, basename='member')
-router.register(r'soberbro', views.SoberBroViewSet, basename='soberbro')
+router.register(r'sober-bro-shifts', views.SoberBroShiftViewSet, basename='sober-bro-shifts')
+router.register(r'sober-bro-shifts/assignments', views.SoberBroViewSet, basename='sober-bro-assignments')
 
 schema_view = get_schema_view(
     openapi.Info(

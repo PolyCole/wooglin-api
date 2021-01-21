@@ -22,26 +22,23 @@ from restapi.data_utilities import apply_search_filters, apply_ordering
 class SoberBroViewSet(ViewSet, CustomPaginationMixin):
     pagination_class = api_settings.DEFAULT_PAGINATION_CLASS
 
-    calculated_fields = ['member_score', 'present']
-
-    # TODO: I think there's room for optimization and code cleanup here.
     def list(self, request):
         pass
 
-    def create(self, request):
-        pass
-
-    def retrieve(self, request, pk=None):
-        pass
-
-    def update(self, request, pk=None):
-        pass
-
-    def partial_update(self, request, pk=None):
-        pass
-
-    def destroy(self, request, pk=None):
-        pass
+    # def create(self, request):
+    #     pass
+    #
+    # def retrieve(self, request, pk=None):
+    #     pass
+    #
+    # def update(self, request, pk=None):
+    #     pass
+    #
+    # def partial_update(self, request, pk=None):
+    #     pass
+    #
+    # def destroy(self, request, pk=None):
+    #     pass
 
     def get_permissions(self):
         """

@@ -67,7 +67,6 @@ class Command(BaseCommand):
             print(e)
             print("Operation failed in " + str(end_time - start_time))
 
-        print("Creating encrypted credentials file in home directory...")
         output = open("/app/static/encrypted_credentials.txt", "w")
 
         file.readline()
