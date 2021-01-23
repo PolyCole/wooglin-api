@@ -12,19 +12,9 @@ class MemberSerializerAdmin(serializers.ModelSerializer):
 
     # TODO: Ensure this operation triggers a re-calculation of membership scores for this entry.
     def create(self, validated_data):
-        if not validated_data['phone']:
+        if not validated_data['member']:
             raise serializers.ValidationError(
                 {"phone": "A phone number is  required for a member account to be created."}
-            )
-
-        if Member.objects.filter(phone=validated_data['phone']):
-            raise serializers.ValidationError(
-                {"phone": "A member account with that phone number already exists."}
-            )
-
-        if User.objects.filter(email=validated_data.get('email')).exists():
-            raise serializers.ValidationError(
-                {"email": "I'm sorry, it looks like there's already a user with that email."}
             )
 
         user = self.create_user(validated_data)
