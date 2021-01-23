@@ -27,6 +27,8 @@ class MemberSerializerAdmin(serializers.ModelSerializer):
                 {"email": "I'm sorry, it looks like there's already a user with that email."}
             )
 
+
+
         user = self.create_user(validated_data)
 
         member = Member.objects.create(
