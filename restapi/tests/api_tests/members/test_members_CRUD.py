@@ -702,7 +702,6 @@ class ApiTests(APITestCase):
         self.assertEqual(Member.objects.count(), 3)
         self.assertEqual(User.objects.count(), 3)
 
-
     # Helper method for improper email formats.
     def bogus_email_test(self, client, data, email):
         data['email'] = email

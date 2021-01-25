@@ -1,11 +1,16 @@
 import json
 import random
+import pytz
+import datetime
+from datetime import timedelta
 
 from django.contrib.auth.models import User
 from faker import Faker
+
 from rest_framework.test import APIClient
 
 from restapi.models.members import Member
+from restapi.models.sober_bro_shifts import SoberBroShift
 
 
 def get_tokens(username, password=""):
@@ -65,6 +70,30 @@ def generate_fake_new_user(is_staff=False):
     )
 
     return member
+
+
+def create_sober_shift():
+    date = datetime.datetime.today().date()
+
+    timezone = pytz.timezone("America/Denver")
+    d = datetime.datetime.now()
+
+    # Assuming two 31-day months, just to be safe.
+    two_months = datetime.timedelta(days=62)
+    two_hours = datetime.timedelta(hours=2)
+
+    d = timezone.localize(d)
+    d = d + two_months
+
+    fake = Faker()
+
+    return SoberBroShift.objects.create(
+        date=date + two_months,
+        title="Test Shfit " + fake.color(),
+        time_start=d,
+        time_end=d + two_hours,
+        capacity=5
+    )
 
 
 # Generates a random phone number of a standard xxx.xxx.xxxx format.
