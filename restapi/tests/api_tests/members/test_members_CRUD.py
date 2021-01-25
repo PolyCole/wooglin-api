@@ -525,7 +525,7 @@ class ApiTests(APITestCase):
         url = '/api/v1/member/' + str(to_delete_member.id) + "/"
         response = client.delete(url, format='json')
 
-        self.assertEqual(response.status_code, status.HTTP_204_NO_CONTENT)
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
         self.assertEqual(Member.objects.filter(id=to_delete_member.id).count(), 0)
         self.assertEqual(Member.objects.count(), members_before - 1)
         self.assertEqual(User.objects.count(), users_before - 1)
