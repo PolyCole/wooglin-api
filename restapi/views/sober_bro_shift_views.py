@@ -1,11 +1,8 @@
 import datetime
-from datetime import timedelta
 from json import loads, dumps
-from collections import OrderedDict
-
-import re
 
 from django.shortcuts import get_object_or_404
+from django.core.exceptions import ObjectDoesNotExist
 
 from rest_framework.decorators import action
 from rest_framework.viewsets import ViewSet
@@ -33,10 +30,17 @@ class SoberBroShiftViewSet(ViewSet, CustomPaginationMixin):
         today_min = datetime.datetime.combine(datetime.date.today(), datetime.time.min)
         today_max = self.add_one_month(datetime.datetime.combine(datetime.date.today(), datetime.time.max))
 
-        # data = SoberBroShift.objects.get(date__range=(today_min, today_max)).order_by('date')
-        data = SoberBroShift.objects.all()
+        try:
+            data = SoberBroShift.objects.get(date__range=(today_min, today_max))
+        except ObjectDoesNotExist:
+            return Response(
+                {
+                    "no_shifts": "There are no shifts found in the next month"
+                },
+                status=status.HTTP_200_OK
+            )
 
-        serializer = SoberBroShiftSerializer(data, many=True)
+        serializer = SoberBroShiftSerializer(data)
 
         return Response(serializer.data)
 
@@ -79,7 +83,7 @@ class SoberBroShiftViewSet(ViewSet, CustomPaginationMixin):
                 return Response(
                     {
                         'operation': 'You are trying to either drop or add a sober bro who is not yourself. You do '
-                                     'not have permission to do this. '
+                                     'not have permission to do this.'
                     },
                     status=status.HTTP_403_FORBIDDEN
                 )
@@ -114,16 +118,16 @@ class SoberBroShiftViewSet(ViewSet, CustomPaginationMixin):
         date = shift[0].shift.date
         shift.delete()
 
+        return_string = 'Successfully removed ' + \
+                        str(member.name) + \
+                        ' from the Sober Bro shift titled ' + \
+                        str(title) + \
+                        ' on ' + \
+                        str(date)
+
         return Response(
-            {
-                'delete': 'Successfully removed ' +
-                          str(member.name) +
-                          ' from the Sober Bro shift titled '
-                          + str(title) +
-                          ' on ' +
-                          str(date)
-            },
-            status=status.HTTP_204_NO_CONTENT
+            {"delete": return_string},
+            status=status.HTTP_200_OK
         )
 
     def add_sober_brother(self, shift_pk, request):

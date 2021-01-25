@@ -177,7 +177,7 @@ class MemberViewSet(ViewSet, CustomPaginationMixin):
             return Response(
                 {'delete': 'The delete operation has completed successfully. If this has been done in error, '
                            'contact your Administrator.'},
-                status=status.HTTP_204_NO_CONTENT
+                status=status.HTTP_200_OK
             )
         else:
             return Response(
