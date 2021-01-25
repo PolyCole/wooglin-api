@@ -1,13 +1,8 @@
 import datetime
-from datetime import timedelta
 from json import loads, dumps
-from collections import OrderedDict
-
-import re
 
 from django.shortcuts import get_object_or_404
 from django.core.exceptions import ObjectDoesNotExist
-from django.db.models import QuerySet
 
 from rest_framework.decorators import action
 from rest_framework.viewsets import ViewSet
@@ -123,16 +118,16 @@ class SoberBroShiftViewSet(ViewSet, CustomPaginationMixin):
         date = shift[0].shift.date
         shift.delete()
 
+        return_string = 'Successfully removed ' + \
+                        str(member.name) + \
+                        ' from the Sober Bro shift titled ' + \
+                        str(title) + \
+                        ' on ' + \
+                        str(date)
+
         return Response(
-            {
-                'delete': 'Successfully removed ' +
-                          str(member.name) +
-                          ' from the Sober Bro shift titled '
-                          + str(title) +
-                          ' on ' +
-                          str(date)
-            },
-            status=status.HTTP_204_NO_CONTENT
+            {"delete": return_string},
+            status=status.HTTP_200_OK
         )
 
     def add_sober_brother(self, shift_pk, request):
