@@ -1,4 +1,5 @@
 import datetime
+import dateutil.parser
 from json import loads, dumps
 
 from django.shortcuts import get_object_or_404
@@ -43,10 +44,6 @@ class SoberBroShiftViewSet(ViewSet, CustomPaginationMixin):
         serializer = SoberBroShiftSerializer(data)
 
         return Response(serializer.data)
-
-    # def create(self, request):
-    #     pass
-    #
 
     def retrieve(self, request, pk=None):
         """
@@ -147,14 +144,54 @@ class SoberBroShiftViewSet(ViewSet, CustomPaginationMixin):
                 return Response(self.trim_data(serializer.data), status=status.HTTP_201_CREATED)
             return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
-    # def update(self, request, pk=None):
-    #     pass
-    #
-    # def partial_update(self, request, pk=None):
-    #     pass
-    #
-    # def destroy(self, request, pk=None):
-    #     pass
+    def create(self, request):
+        validated_data = request.data.copy()
+
+        if 'capacity' not in validated_data:
+            validated_data['capacity'] = 5
+
+        serializer = SoberBroShiftSerializer(data=validated_data)
+
+        if serializer.is_valid():
+            serializer.save()
+            return Response(serializer.data, status=status.HTTP_201_CREATED)
+        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
+    def update(self, request, pk=None):
+        """
+        Handles PUT requests. Essentially, maps to either create or partial_update depending on the request.
+        """
+
+        # If the pk doesn't exist, it should be created.
+        if SoberBroShift.objects.filter(id=pk).count() == 0:
+            return self.create(request)
+
+        # If the pk exists, the data in it should be updated.
+        # However, there currently aren't any use cases in which we would want to allow the user to
+        # update the entirety of a SoberBroShift record. Especially if PATCH supports multi-field updates already.
+        return self.partial_update(request, pk)
+
+    def partial_update(self, request, pk=None):
+        queryset = SoberBroShift.objects.all()
+        shift = get_object_or_404(queryset, id=pk)
+
+        serializer = SoberBroShiftSerializer(shift, data=request.data, partial=True)
+
+        if serializer.is_valid():
+            serializer.save()
+            return Response(serializer.data, status=status.HTTP_200_OK)
+        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
+    def destroy(self, request, pk=None):
+        queryset = SoberBroShift.objects.all()
+        shift = get_object_or_404(queryset, id=pk)
+
+        if shift:
+            shift.delete()
+            return Response(
+                {'delete': 'The Sober Bro Shift delete operation has completed successfully.'},
+                status=status.HTTP_200_OK
+            )
 
     # TODO: Remove this. It's a crutch because I'm not fully an expert with nested serializers yet.
     def trim_data(self, serializer_data):
