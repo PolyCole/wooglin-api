@@ -1,24 +1,21 @@
 import datetime
-import dateutil.parser
 from json import loads, dumps
 
-from django.shortcuts import get_object_or_404
 from django.core.exceptions import ObjectDoesNotExist
-
+from django.shortcuts import get_object_or_404
+from rest_framework import status
 from rest_framework.decorators import action
-from rest_framework.viewsets import ViewSet
 from rest_framework.permissions import IsAuthenticated, IsAdminUser
 from rest_framework.response import Response
-from rest_framework import status
 from rest_framework.settings import api_settings
+from rest_framework.viewsets import ViewSet
 
-from restapi.serializers import SoberBroShiftSerializer
-from restapi.serializers import SoberBroSerializer
-
+from restapi.mixins import CustomPaginationMixin
+from restapi.models.members import Member
 from restapi.models.sober_bro_shifts import SoberBroShift
 from restapi.models.sober_bros import SoberBro
-from restapi.models.members import Member
-from restapi.mixins import CustomPaginationMixin
+from restapi.serializers import SoberBroSerializer
+from restapi.serializers import SoberBroShiftSerializer
 
 
 class SoberBroShiftViewSet(ViewSet, CustomPaginationMixin):
@@ -27,6 +24,7 @@ class SoberBroShiftViewSet(ViewSet, CustomPaginationMixin):
     def list(self, request):
         """
         Lists the Sober Bro shifts in the database.
+        By default, it only grabs shifts within 31 days of the current day. 
         """
         today_min = datetime.datetime.combine(datetime.date.today(), datetime.time.min)
         today_max = self.add_one_month(datetime.datetime.combine(datetime.date.today(), datetime.time.max))

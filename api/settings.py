@@ -59,13 +59,15 @@ INSTALLED_APPS = [
     'django.contrib.admin',
     'django.contrib.auth',
     'django.contrib.contenttypes',
+    'django.contrib.sites',
     'django.contrib.sessions',
     'django.contrib.messages',
     'django.contrib.staticfiles',
-    'restapi',
     'rest_framework',
     'drf_yasg',
+    'restapi',
 ]
+
 
 # Middleware is added in the order it appears in this list
 # DO NOT PUT ANYTHING ABOVE SecurityMiddleware
