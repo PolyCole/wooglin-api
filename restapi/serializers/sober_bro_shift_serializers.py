@@ -1,13 +1,11 @@
-from attr.filters import exclude
-from rest_framework import serializers
-from restapi.models.members import Member
-from restapi.models.sober_bros import SoberBro
-from restapi.models.sober_bro_shifts import SoberBroShift
-from django.contrib.auth.models import User
-import re
 import datetime
+import re
+
 import dateutil.parser
 import pytz
+from rest_framework import serializers
+
+from restapi.models.sober_bro_shifts import SoberBroShift
 
 
 class SoberBroShiftSerializer(serializers.ModelSerializer):
@@ -16,6 +14,10 @@ class SoberBroShiftSerializer(serializers.ModelSerializer):
         fields = '__all__'
 
     def create(self, validated_data):
+        """
+        Creates a shift based on the information passed in.
+        """
+
         new_shift = SoberBroShift.objects.create(
             date=validated_data['date'],
             title=validated_data['title'] if 'title' in validated_data else self.default_shift_title(validated_data),
@@ -27,6 +29,9 @@ class SoberBroShiftSerializer(serializers.ModelSerializer):
         return new_shift
 
     def default_shift_title(self, data):
+        """
+        Returns the default title for a shift if it isn't already specified.
+        """
         format_string = '%I:%M%p'
 
         "Shift on " + str(data['date'])
@@ -39,6 +44,9 @@ class SoberBroShiftSerializer(serializers.ModelSerializer):
         return title
 
     def update(self, shift, new_data):
+        """
+        Updates fields in the shift, updates title too to reflect changes if necesary.
+        """
         for field in new_data:
             setattr(shift, field, new_data[field])
 
@@ -51,6 +59,10 @@ class SoberBroShiftSerializer(serializers.ModelSerializer):
         return shift
 
     def to_internal_value(self, validated_data):
+        """
+        Data validation.
+        """
+
         time_fields = ['time_start', 'time_end', 'date']
 
         for item in validated_data:
@@ -117,6 +129,7 @@ class SoberBroShiftSerializer(serializers.ModelSerializer):
 
         return super(SoberBroShiftSerializer, self).to_internal_value(validated_data)
 
+    # Ensures we have a datetime format that plays nicely with the database.
     def check_date_format(self, data, field):
         if type(data[field]) is str:
             temp = dateutil.parser.parse(data[field])

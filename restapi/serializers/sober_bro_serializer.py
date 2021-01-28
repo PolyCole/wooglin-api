@@ -11,6 +11,9 @@ class SoberBroSerializer(serializers.ModelSerializer):
         depth = 1
 
     def create(self, validated_data):
+        """
+        Assigns a member to a shift, based on the information passed in.
+        """
         shift = SoberBroShift.objects.get(id=validated_data['shift'])
         member = Member.objects.get(id=validated_data['member'])
 
@@ -22,6 +25,10 @@ class SoberBroSerializer(serializers.ModelSerializer):
         return sober_bro
 
     def to_internal_value(self, data):
+        """
+        Data validation.
+        """
+
         if not Member.objects.filter(id=data.get('member')):
             raise serializers.ValidationError(
                 {
