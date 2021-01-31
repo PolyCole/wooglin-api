@@ -369,3 +369,30 @@ class ApiTests(APITestCase):
                          "Your specified end time for the shift is in the past. Shifts in the past can "
                          "only be altered by the administrator. ")
         self.assertEqual(SoberBroShift.objects.filter(id=self.shift.id)[0].time_end, before_value)
+
+    def test_delete_404(self):
+        member = generate_fake_new_user(True)
+        client = get_authed_client(member.name, 'fake_password')
+
+        before_count = SoberBroShift.objects.count()
+        response = client.delete('/api/v1/sober-bro-shift/12412/', format='json')
+        content = get_response_content(response)
+
+        self.assertEqual(response.status_code, status.HTTP_404_NOT_FOUND)
+        self.assertTrue('detail' in content)
+        self.assertEqual(content['detail'], 'Not found.')
+        self.assertEqual(SoberBroShift.objects.count(), before_count)
+
+    def test_delete_happy_path(self):
+        member = generate_fake_new_user(True)
+        client = get_authed_client(member.name, 'fake_password')
+
+        before_count = SoberBroShift.objects.count()
+        response = client.delete('/api/v1/sober-bro-shift/' + str(self.shift.id) + '/', format='json')
+        content = get_response_content(response)
+
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        self.assertEqual(SoberBroShift.objects.count(), before_count - 1)
+        self.assertTrue('delete' in content)
+        self.assertEqual(content['delete'], 'The Sober Bro Shift delete operation has completed successfully. Any '
+                                            'members assigned to this shift have been removed as well.')

@@ -186,9 +186,19 @@ class SoberBroShiftViewSet(ViewSet, CustomPaginationMixin):
 
         if shift:
             shift.delete()
+            assigned_sbs = SoberBro.objects.all().filter(shift=shift.id)
+
+            # I think this is handled by default through Django's CASCADE behavior, but it doesn't hurt to be safe.
+            if assigned_sbs:
+                assigned_sbs.delete()
+
             return Response(
-                {'delete': 'The Sober Bro Shift delete operation has completed successfully.'},
+                {
+                    'delete': 'The Sober Bro Shift delete operation has completed successfully. Any members assigned '
+                              'to this shift have been removed as well.'
+                },
                 status=status.HTTP_200_OK
+
             )
 
     # TODO: Remove this. It's a crutch because I'm not fully an expert with nested serializers yet.
