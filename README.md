@@ -3,7 +3,8 @@
 </p>
 
 ![CircleCI](https://img.shields.io/circleci/build/github/WooglinAlphaZeta/wooglin-api/main?style=for-the-badge)
-
+<img alt="GitHub last commit" src="https://img.shields.io/github/last-commit/WooglinAlphaZeta/wooglin-api?color=%20%23ff751a&style=for-the-badge">
+<img alt="GitHub commit activity" src="https://img.shields.io/github/commit-activity/m/WooglinAlphaZeta/wooglin-api?style=for-the-badge">
 ***
 
 ### The REST API Powering the Wooglin Slackbot.
