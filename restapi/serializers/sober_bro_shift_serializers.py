@@ -74,22 +74,33 @@ class SoberBroShiftSerializer(serializers.ModelSerializer):
         today = timezone.localize(today)
 
         # Start or end time in the past.
-        if validated_data['time_start'] < today or validated_data['time_end'] < today:
-            raise serializers.ValidationError(
-                {
-                    "timeframe": "Your start or end time for the shift are in the past. Shifts in the past can only "
-                                 "be altered by the administrator. "
-                }
-            )
+        if 'time_start' in validated_data:
+            if validated_data['time_start'] < today:
+                raise serializers.ValidationError(
+                    {
+                        "time_start": "Your specified start time for the shift is in the past. Shifts in the past "
+                                      "can only be altered by the administrator."
+                    }
+                )
+
+        if 'time_end' in validated_data:
+            if validated_data['time_end'] < today:
+                raise serializers.ValidationError(
+                    {
+                        "time_end": "Your specified end time for the shift is in the past. Shifts in the past can "
+                                    "only be altered by the administrator. "
+                    }
+                )
 
         # Shift date in the past.
-        if validated_data['date'] < today.date():
-            raise serializers.ValidationError(
-                {
-                    "date": "The date you've specified is in the past. Shifts in the past can only be created by an "
-                            "administrator. "
-                }
-            )
+        if 'date' in validated_data:
+            if validated_data['date'] < today.date():
+                raise serializers.ValidationError(
+                    {
+                        "date": "The date you've specified is in the past. Shifts in the past can only be created by an "
+                                "administrator."
+                    }
+                )
 
         # Negative capacity.
         if 'capacity' in validated_data:
@@ -100,7 +111,11 @@ class SoberBroShiftSerializer(serializers.ModelSerializer):
                     }
                 )
 
-        same_day_shifts = SoberBroShift.objects.filter(date=validated_data['date'])
+        # mmmmmm this can be optimized.
+        if 'date' in validated_data:
+            same_day_shifts = SoberBroShift.objects.filter(date=validated_data['date'])
+        else:
+            same_day_shifts = SoberBroShift.objects.filter(title="SuperFakeShiftThatDoesntExist")
 
         # Ensuring there's only one shift during any given timeslot. Overlapping is not preferable.
         if same_day_shifts.count() != 0:
