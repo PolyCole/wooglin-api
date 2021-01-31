@@ -66,6 +66,8 @@ INSTALLED_APPS = [
     'rest_framework',
     'drf_yasg',
     'restapi',
+    'health_check',
+    'health_check.db',
 ]
 
 
