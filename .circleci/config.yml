@@ -36,7 +36,7 @@ jobs:
                         "type": "header",
                         "text": {
                             "type": "plain_text",
-                            "text": ":tada: Deployment Successful! :tada:",
+                            "text": ":server: Wooglin-API Deployment Successful! :tada:",
                             "emoji": true
                         }
                     },
@@ -95,7 +95,7 @@ jobs:
                   "type": "header",
                   "text": {
                     "type": "plain_text",
-                    "text": ":red_circle: Job Failed. :red_circle:",
+                    "text": ":server: Wooglin-API Deployment Failed. :red_circle:",
                     "emoji": true
                   }
                 },
