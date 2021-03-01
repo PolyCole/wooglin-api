@@ -7,8 +7,8 @@
 <img alt="GitHub commit activity" src="https://img.shields.io/github/commit-activity/m/WooglinAlphaZeta/wooglin-api?style=for-the-badge">
 ***
 
-### The REST API Powering the Wooglin Slackbot.
+### Introduction
+This repository houses the REST API that allows access to the chapter's data. The API acts as the sole source of truth for data, and will be the backbone of both the SlackBot portion of Wooglin and the eventual SPA portion of Wooglin being privy to the same information. 
 
-This REST API handles the base functionality for features executed by the Wooglin Slackbot. It provides methods by which the bot is able to interact with the chapter data. 
-
-The API itself is written using Django, and will be deployed using Docker and Heroku. The API is documented using OpenAPI's Swagger UI. Which can be accessed at http://127.0.0.1:8000/api/v1/swagger, when working on a development environment locally. 
+### How It Works
+The API is written in Python, using Django and the Django Rest Framework. The app is deployed using Heroku and CI/CD is facilitated by CircleCI. The API is documented using Swagger, and the documentation can be found [here](https://wooglin-api.herokuapp.com/api/v1/swagger).
