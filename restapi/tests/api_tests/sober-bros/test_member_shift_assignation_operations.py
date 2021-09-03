@@ -179,7 +179,7 @@ class ApiTests(APITestCase):
 
         self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
         self.assertTrue('member' in content)
-        self.assertEqual(content['member'], "The member you're trying to delete is not currenly a part of this shift.")
+        self.assertEqual(content['member'], "The member you're trying to delete is not currently a part of this shift.")
         self.assertEqual(SoberBro.objects.filter(shift=self.shift).count(), 4)
 
     def test_delete_sb_member_id_not_included(self):
