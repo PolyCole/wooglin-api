@@ -67,3 +67,16 @@ class NextShiftViewSet(ViewSet, CustomPaginationMixin):
             current_shift["brothers"] = brothers_list
 
         return Response(serializer.data)
+
+    def get_permissions(self):
+        """
+        Instantiates and returns the list of permissions that this view requires.
+        """
+
+        admin_only = ['list']
+
+        if self.action in admin_only:
+            permission_classes = [IsAdminUser]
+        else:
+            permission_classes = [IsAuthenticated]
+        return [permission() for permission in permission_classes]

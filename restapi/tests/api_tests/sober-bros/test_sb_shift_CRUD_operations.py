@@ -43,7 +43,7 @@ class ApiTests(APITestCase):
 
         self.shift = shift
 
-    def test_unathed_shift_gets(self):
+    def test_unauthed_shift_gets(self):
         response = self.client.get('/api/v1/sober-bro-shift/', format='json')
         self.assertEqual(response.status_code, status.HTTP_401_UNAUTHORIZED)
 
