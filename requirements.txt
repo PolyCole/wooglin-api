@@ -49,6 +49,7 @@ packaging==20.8
 paramiko==2.7.2
 pathspec==0.5.9
 pip-autoremove==0.9.1
+psycopg2==2.9.1
 psycopg2-binary==2.8.6
 pycparser==2.20
 PyJWT==1.7.1
