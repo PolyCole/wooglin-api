@@ -103,7 +103,7 @@ class SoberBroShiftViewSet(ViewSet, CustomPaginationMixin):
         if shift.count() == 0:
             return Response(
                 {
-                    "member": "The member you're trying to delete is not currenly a part of this shift."
+                    "member": "The member you're trying to delete is not currently a part of this shift."
                 },
                 status=status.HTTP_400_BAD_REQUEST
             )
