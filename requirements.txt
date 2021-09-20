@@ -23,6 +23,7 @@ dj-database-url==0.5.0
 Django==3.1.4
 django-health-check==3.16.2
 djangorestframework==3.12.2
+djangorestframework-api-key==2.0.0
 djangorestframework-simplejwt==4.6.0
 dnspython==1.16.0
 docker==4.3.1

@@ -67,6 +67,7 @@ INSTALLED_APPS = [
     'restapi',
     'health_check',
     'health_check.db',
+    'rest_framework_api_key',
 ]
 
 

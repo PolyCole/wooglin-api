@@ -45,7 +45,6 @@ class ApiTests(APITestCase):
 
     def test_get_next_sb_shift(self):
         member = generate_fake_new_user(True)
-        client = get_authed_client(member.name, 'fake_password')
 
         timezone = pytz.timezone("America/Denver")
         now = datetime.datetime.now()
@@ -67,7 +66,7 @@ class ApiTests(APITestCase):
             member=member
         )
 
-        response = client.get('/api/v1/next-sb-shift/', format='json')
+        response = get_api_key_client().get('/api/v1/next-sb-shift/', format='json')
         content = get_response_content(response)
 
         self.assertEqual(response.status_code, status.HTTP_200_OK)
@@ -82,10 +81,7 @@ class ApiTests(APITestCase):
         self.assertEqual(brother["phone"], member.phone)
 
     def test_get_next_sb_shift_no_shifts(self):
-        member = generate_fake_new_user(True)
-        client = get_authed_client(member.name, 'fake_password')
-
-        response = client.get('/api/v1/next-sb-shift/', format='json')
+        response = get_api_key_client().get('/api/v1/next-sb-shift/', format='json')
         content = get_response_content(response)
 
         self.assertEqual(response.status_code, status.HTTP_200_OK)
@@ -94,3 +90,11 @@ class ApiTests(APITestCase):
     def test_unauthed_get_next_sb_shift(self):
         response = self.client.get('/api/v1/next-sb-shift/', format='json')
         self.assertEqual(response.status_code, status.HTTP_401_UNAUTHORIZED)
+
+    def test_bearer_token_bonks(self):
+        member = generate_fake_new_user(True)
+        client = get_authed_client(member.name, 'fake_password')
+
+        response = client.get('/api/v1/next-sb-shift/', format='json')
+        self.assertEqual(response.status_code, status.HTTP_403_FORBIDDEN)
+

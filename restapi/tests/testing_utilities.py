@@ -8,6 +8,7 @@ from django.contrib.auth.models import User
 from faker import Faker
 
 from rest_framework.test import APIClient
+from rest_framework_api_key.models import APIKey
 
 from restapi.models.members import Member
 from restapi.models.sober_bro_shifts import SoberBroShift
@@ -27,6 +28,13 @@ def get_authed_client(username, password):
     token = get_tokens(username, password)['access']
     client = APIClient()
     client.credentials(HTTP_AUTHORIZATION='Bearer ' + str(token))
+    return client
+
+
+def get_api_key_client():
+    api_key, key = APIKey.objects.create_key(name="Testing key")
+    client = APIClient()
+    client.credentials(HTTP_AUTHORIZATION=f"Api-Key {key}")
     return client
 
 

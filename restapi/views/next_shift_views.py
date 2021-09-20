@@ -1,26 +1,20 @@
 import datetime
 import pytz
-from json import loads, dumps
 
-from django.core.exceptions import ObjectDoesNotExist
-from django.shortcuts import get_object_or_404
 from rest_framework import status
-from rest_framework.decorators import action
-from rest_framework.permissions import IsAuthenticated, IsAdminUser
 from rest_framework.response import Response
-from rest_framework.settings import api_settings
 from rest_framework.viewsets import ViewSet
 
 from restapi.mixins import CustomPaginationMixin
-from restapi.models.members import Member
 from restapi.models.sober_bro_shifts import SoberBroShift
 from restapi.models.sober_bros import SoberBro
-from restapi.serializers import SoberBroSerializer
 from restapi.serializers import SoberBroShiftSerializer
 from restapi.serializers import UpcomingSoberBroSerializer
+from rest_framework_api_key.permissions import HasAPIKey
 
 
 class NextShiftViewSet(ViewSet, CustomPaginationMixin):
+    permission_classes = [HasAPIKey]
 
     def list(self, request):
         """
@@ -67,16 +61,3 @@ class NextShiftViewSet(ViewSet, CustomPaginationMixin):
             current_shift["brothers"] = brothers_list
 
         return Response(serializer.data)
-
-    def get_permissions(self):
-        """
-        Instantiates and returns the list of permissions that this view requires.
-        """
-
-        admin_only = ['list']
-
-        if self.action in admin_only:
-            permission_classes = [IsAdminUser]
-        else:
-            permission_classes = [IsAuthenticated]
-        return [permission() for permission in permission_classes]
