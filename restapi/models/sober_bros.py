@@ -16,5 +16,5 @@ class SoberBro(models.Model):
 
     def __str__(self):
         return str(self.member.name) + \
-               " is signed up for a shift on " + \
-               str(self.shift.date)
+               " on shift " + \
+               str(self.shift.title)
