@@ -3,6 +3,8 @@
 # Project-Specific
 secrets.json
 
+temp.py
+
 # Static files.
 staticfiles/*
 
